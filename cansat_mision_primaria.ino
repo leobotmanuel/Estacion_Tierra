@@ -3,18 +3,17 @@
 #include <Adafruit_BME280.h>
 #include <math.h>
 
-Adafruit_BME280 bme; // use I2C interface
+Adafruit_BME280 bme;
 Adafruit_Sensor *bme_temp = bme.getTemperatureSensor();
 Adafruit_Sensor *bme_pressure = bme.getPressureSensor();
 Adafruit_Sensor *bme_humidity = bme.getHumiditySensor();
 
-const float R = 8.31432;
-const float u = 0.0289644;
-const float g = 9.81;
-float presion_mar = 101.325;
+const float R_gases = 8.31432;
+const float u_aire = 28.96;
+const float gravedad = 9.81;
+float presion_nivel_mar = 101325;
 float presion_cansat = 0;
-float t = 0;
-
+float temperatura_k = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -25,9 +24,9 @@ void setup() {
     while (1) delay(10);
   }
   
-  bme_temp->printSensorDetails();
+  /*bme_temp->printSensorDetails();
   bme_pressure->printSensorDetails();
-  bme_humidity->printSensorDetails();
+  bme_humidity->printSensorDetails();*/
 }
  
 
@@ -50,10 +49,10 @@ void loop() {
   Serial.println(" hPa");
 
   presion_cansat = pressure_event.pressure * 100;
-  t = temp_event.temperature + 273;
+  temperatura_k = temp_event.temperature + 273;
 
-  float k = (R*t)/(u*g);
-  float h = k * (log(presion_mar) - log(presion_cansat));
-  Serial.println(h);
+  float k = (R_gases * temperatura_k)/(u_aire * gravedad);
+  float altitud = k * (log(presion_nivel_mar)-log(presion_cansat));
+  Serial.println(altitud);
 
 }
