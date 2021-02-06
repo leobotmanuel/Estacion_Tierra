@@ -12,8 +12,8 @@ const float R = 8.31432;
 const float u = 0.0289644;
 const float g = 9.81;
 float p0 = 101325;
-float p = 5780;
-float T = 216.25;
+float p = 0;
+float t = 0;
 
 
 void setup() {
@@ -50,9 +50,10 @@ void loop() {
   Serial.println(" hPa");
 
   p = pressure_event.pressure;
+  t = temp_event.temperature;
 
-  float k = (R*T)/(u*g);
-  float h = k * (log(p0)-log(p)) + 2000;
+  float k = (R*t)/(u*g);
+  float h = k * (log(p0)-log(p));
   Serial.println(h);
 
 }
