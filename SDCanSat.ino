@@ -20,7 +20,7 @@ int escribirEnLaSD(char nombreDelDocumento, char contenido]) {
     archivo.print(contenido);
     Serial.println("Escribiendo en el archivo...");
     Serial.println("Contenido del archivo: ");
-    while (archivo.availabñle()) {
+    while (archivo.available()) {
       Serial.write(archivo.read());
     }
     archivo.close();
