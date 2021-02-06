@@ -11,8 +11,8 @@ Adafruit_Sensor *bme_humidity = bme.getHumiditySensor();
 const float R = 8.31432;
 const float u = 0.0289644;
 const float g = 9.81;
-float p0 = 101325;
-float p = 0;
+float presion_mar = 101.325;
+float presion_cansat = 0;
 float t = 0;
 
 
@@ -49,12 +49,11 @@ void loop() {
   Serial.print(pressure_event.pressure);
   Serial.println(" hPa");
 
-  p = pressure_event.pressure;
-  t = temp_event.temperature;
+  presion_cansat = pressure_event.pressure * 100;
+  t = temp_event.temperature + 273;
 
   float k = (R*t)/(u*g);
-  float h = k * (log(p0)-log(p));
+  float h = k * (log(presion_mar) - log(presion_cansat));
   Serial.println(h);
 
 }
-
