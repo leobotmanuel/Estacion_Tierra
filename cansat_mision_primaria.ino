@@ -11,7 +11,7 @@ Adafruit_Sensor *bme_humidity = bme.getHumiditySensor();
 const float R_gases = 8.31432;
 const float u_aire = 28.96;
 const float gravedad = 9.81;
-float presion_nivel_mar = 101325;
+float presion_nivel_mar = 1013.25;
 float presion_cansat = 0;
 float temperatura_k = 0;
 
@@ -23,10 +23,6 @@ void setup() {
     Serial.println(F("No se ha encontrado el sensor BME280"));
     while (1) delay(10);
   }
-  
-  /*bme_temp->printSensorDetails();
-  bme_pressure->printSensorDetails();
-  bme_humidity->printSensorDetails();*/
 }
  
 
@@ -47,12 +43,12 @@ void loop() {
   Serial.print(F("Presion: "));
   Serial.print(pressure_event.pressure);
   Serial.println(" hPa");
+  
+  Serial.print(F("Altitud: "));
+  Serial.print(bme.readAltitude(presion_nivel_mar));
+  Serial.println(" m");
 
-  presion_cansat = pressure_event.pressure * 100;
-  temperatura_k = temp_event.temperature + 273;
-
-  float k = (R_gases * temperatura_k)/(u_aire * gravedad);
-  float altitud = k * (log(presion_nivel_mar)-log(presion_cansat));
-  Serial.println(altitud);
-
+  Serial.println(" ");
+  
+  delay(2000);
 }
