@@ -12,12 +12,11 @@
 #define WIFI_PASSWORD       "Saul21052004/"
 
 // Definimos los parametros de ThingsBoard
-#define TEMPERATURA               "GDKULyqnfmTYOsYj03SN"
-#define HUMEDAD               "GDKULyqnfmTYOsYj03SN"
+#define TEMP_HUM              "GDKULyqnfmTYOsYj03SN"
 #define ALTITUD               "GDKULyqnfmTYOsYj03SN"
-#define ACELERACION               "GDKULyqnfmTYOsYj03SN"
+#define ACELERACION           "GDKULyqnfmTYOsYj03SN"
 #define BRUJULA               "GDKULyqnfmTYOsYj03SN"
-#define GPS               "GDKULyqnfmTYOsYj03SN"
+#define GPS                   "GDKULyqnfmTYOsYj03SN"
 
 #define THINGSBOARD_SERVER  "192.168.1.13"
 #define THINGSBOARD_PORT    8080
@@ -46,20 +45,48 @@ void setup()
   Serial.println(F("Iniciado correctamente"));
 
 
-    Fichero = SD.open("calidad.csv", FILE_WRITE);
+    Fichero = SD.open("cansat.csv", FILE_WRITE);
     if(Fichero) {
-      Fichero.println("Tiempo(ms), Humedad_Relativa, Temperatura, PresionBarometrica, AcelerometroX, AcelerometroY, AcelerometroZ, GiroscopioX, GiroscopioY, GiroscopioZ, MagnetometroX, MagnetometroY, MagnetometroZ");
-      Serial.println("Archivo escrito, se escribió la cabecera kilométrica del csv...");
+      Fichero.println("Tiempo(ms), Humedad_Relativa, Temperatura, Presion_Barometrica, AcelerometroX, AcelerometroY, AcelerometroZ, GiroscopioX, GiroscopioY, GiroscopioZ, MagnetometroX, MagnetometroY, MagnetometroZ");
+      Serial.println("Archivo escrito, se escribió la cabecera del csv...");
       Fichero.close();
       } else {
-        Serial.println("Error al crear la cabecera kilométrica!!!");
+        Serial.println("Error al crear la cabecera");
         }
     }
 
  
 void loop()
 {
+  delay(1000);
+
+  if (WiFi.status() != WL_CONNECTED) {
+    reconnect();
+  }
+
+  if (!tb.connected()) {
+   
+    // Conectar a ThingsBoard
+    Serial.print("Conectando a: ");
+    Serial.print(THINGSBOARD_SERVER);
+    Serial.print(" con el token ");
+    Serial.println(TOKEN);
+    if (!tb.connect(THINGSBOARD_SERVER, TEMP_HUM)) {
+      Serial.println("Error al conectar");
+      return;
+    }
+  }
+
+ // Mandamos los datos
+  Serial.println("Mandando datos...");
+
+  tb.sendTelemetryInt("temperatura", random(1,50));
+  tb.sendTelemetryFloat("humedad", random(1,50));
+
+  tb.loop();
 }
+
+// Funcion para iniciar la WiFi
 void InitWiFi()
 {
   Serial.println("Conectando ...");
@@ -72,6 +99,7 @@ void InitWiFi()
   Serial.println("Conectado!");
 }
 
+// Funcion para reconectar a WiFi
 void reconnect() {
   status = WiFi.status();
   if ( status != WL_CONNECTED) {
