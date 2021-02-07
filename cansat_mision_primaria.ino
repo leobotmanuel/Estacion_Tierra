@@ -12,8 +12,8 @@ const float R_gases = 8.31432;
 const float u_aire = 28.96;
 const float gravedad = 9.81;
 float presion_nivel_mar = 1013.25;
-float presion_cansat = 0;
-float temperatura_k = 0;
+float presion_cansat;
+float temperatura_k;
 
 void setup() {
   Serial.begin(9600);
