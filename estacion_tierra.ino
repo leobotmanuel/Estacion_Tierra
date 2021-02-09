@@ -3,20 +3,17 @@
 // Declaramos las librerias
 #include <SD.h>
 #include <SPI.h>
+#include <LoRa.h>
 #include <PubSubClient.h>
 #include "ThingsBoard.h"
 #include <ESP8266WiFi.h>
 
 // Definimos las credenciales de la WiFi
-#define WIFI_AP             "gofionet"
-#define WIFI_PASSWORD       "Saul21052004/"
+#define WIFI_AP             "..."
+#define WIFI_PASSWORD       "..."
 
 // Definimos los parametros de ThingsBoard
-#define TEMP_HUM              "GDKULyqnfmTYOsYj03SN"
-#define ALTITUD               "GDKULyqnfmTYOsYj03SN"
-#define ACELERACION           "GDKULyqnfmTYOsYj03SN"
-#define BRUJULA               "GDKULyqnfmTYOsYj03SN"
-#define GPS                   "GDKULyqnfmTYOsYj03SN"
+#define TOKEN               "GDKULyqnfmTYOsYj03SN"
 
 #define THINGSBOARD_SERVER  "192.168.1.13"
 #define THINGSBOARD_PORT    8080
@@ -30,7 +27,7 @@ File Fichero;
  
 void setup()
 {
- //Iniciamos el Serial y la WiFi
+ // Iniciamos el Serial y la WiFi
   Serial.begin(9600);
   WiFi.begin(WIFI_AP, WIFI_PASSWORD);
  
@@ -39,25 +36,45 @@ void setup()
   Serial.print(F("Iniciando SD ..."));
   if (!SD.begin(9))
   {
-    Serial.println(F("Error al iniciar"));
+    Serial.println(F("Error al iniciar SD"));
     return;
   }
-  Serial.println(F("Iniciado correctamente"));
+  Serial.println(F("Iniciado SD correctamente"));
 
-
-    Fichero = SD.open("cansat.csv", FILE_WRITE);
-    if(Fichero) {
-      Fichero.println("Tiempo(ms), Humedad_Relativa, Temperatura, Presion_Barometrica, AcelerometroX, AcelerometroY, AcelerometroZ, GiroscopioX, GiroscopioY, GiroscopioZ, MagnetometroX, MagnetometroY, MagnetometroZ");
-      Serial.println("Archivo escrito, se escribió la cabecera del csv...");
-      Fichero.close();
-      } else {
-        Serial.println("Error al crear la cabecera");
-        }
-    }
+ // Iniciamos LoRa a una frecuencia de 868 MHz
+ if (!LoRa.begin(868E6)) {
+    Serial.println("Error al conectar con LoRa");
+    while (1);
+  }
+ // Creamos el fichero de los datos en la SD, y escribimos las cabeceras
+  Fichero = SD.open("cansat.csv", FILE_WRITE);
+   if(Fichero) {
+     Fichero.println("Tiempo(ms), Humedad_Relativa, Temperatura, Presion_Barometrica, AcelerometroX, AcelerometroY, AcelerometroZ, GiroscopioX, GiroscopioY, GiroscopioZ, MagnetometroX, MagnetometroY, MagnetometroZ");
+     Serial.println("Archivo escrito, se escribió la cabecera del csv...");
+     Fichero.close();
+     } else {
+       Serial.println("Error al crear la cabecera");
+      }
+   }
 
  
 void loop()
 {
+  // Parseamos el paquete de datos recibido del cansat
+  int packetSize = LoRa.parsePacket();
+  if (packetSize) {
+    // received a packet
+    Serial.print("Paquete recibido! ");
+
+    // leer el paquete y mostrarlo por el serial
+    while (LoRa.available()) {
+      Serial.print((char)LoRa.read());
+    }
+
+    // print RSSI of packet
+    Serial.print(" con RSSI ");
+    Serial.println(LoRa.packetRssi());
+  }
   delay(1000);
 
   if (WiFi.status() != WL_CONNECTED) {
@@ -71,8 +88,8 @@ void loop()
     Serial.print(THINGSBOARD_SERVER);
     Serial.print(" con el token ");
     Serial.println(TOKEN);
-    if (!tb.connect(THINGSBOARD_SERVER, TEMP_HUM)) {
-      Serial.println("Error al conectar");
+    if (!tb.connect(THINGSBOARD_SERVER, TOKEN)) {
+      Serial.println("Error al conectar con thingsboard");
       return;
     }
   }
