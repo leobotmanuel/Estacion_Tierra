@@ -76,7 +76,14 @@ void loop()
     Serial.println(LoRa.packetRssi());
    
     // Guardamos los datos recibidos del cansat en la SD
-  }
+   Fichero = SD.open("cansat.csv", FILE_WRITE);
+   if (not Fichero)
+   Serial.println("No se pudo abrir el fichero");
+   else{
+   Fichero.println((char)LoRa.read());
+   Fichero.close();
+   }
+  
   delay(1000);
 
   if (WiFi.status() != WL_CONNECTED) {
