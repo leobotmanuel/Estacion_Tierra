@@ -66,14 +66,16 @@ void loop()
     // received a packet
     Serial.print("Paquete recibido! ");
 
-    // leer el paquete y mostrarlo por el serial
+    // Leer el paquete y mostrarlo por el serial
     while (LoRa.available()) {
       Serial.print((char)LoRa.read());
     }
 
-    // print RSSI of packet
+    // Imprimir el RSSI del paquete
     Serial.print(" con RSSI ");
     Serial.println(LoRa.packetRssi());
+   
+    // Guardamos los datos recibidos del cansat en la SD
   }
   delay(1000);
 
