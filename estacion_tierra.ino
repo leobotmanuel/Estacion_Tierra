@@ -4,9 +4,9 @@
 #include <SD.h>
 #include <SPI.h>
 #include <LoRa.h>
-#include <PubSubClient.h>
-#include "ThingsBoard.h"
-#include <ESP8266WiFi.h>
+//#include <PubSubClient.h>
+//#include "ThingsBoard.h"
+//#include <ESP8266WiFi.h>
 
 // Definimos las credenciales de la WiFi
 #define WIFI_AP             "..."
@@ -18,21 +18,22 @@
 #define THINGSBOARD_SERVER  "192.168.1.13"
 #define THINGSBOARD_PORT    8080
 
-WiFiClient espClient;
-ThingsBoard tb(espClient);
-int status = WL_IDLE_STATUS;
+//WiFiClient espClient;
+//ThingsBoard tb(espClient);
+//int status = WL_IDLE_STATUS;
 
-// Creamos el fichero de la SD 
+// Creamos el fichero de la SD
 File Fichero;
- 
+
 void setup()
 {
- // Iniciamos el Serial y la WiFi
+  // Iniciamos el Serial y la WiFi
   Serial.begin(9600);
-  WiFi.begin(WIFI_AP, WIFI_PASSWORD);
- 
-  InitWiFi();
- 
+  //WiFi.begin(WIFI_AP, WIFI_PASSWORD);
+
+  //InitWiFi();
+  delay(2000);
+  
   Serial.print(F("Iniciando SD ..."));
   if (!SD.begin(9))
   {
@@ -41,77 +42,83 @@ void setup()
   }
   Serial.println(F("Iniciado SD correctamente"));
 
- // Iniciamos LoRa a una frecuencia de 868 MHz
- if (!LoRa.begin(868E6)) {
+  // Iniciamos LoRa a una frecuencia de 868 MHz
+  if (!LoRa.begin(868E6)) {
     Serial.println("Error al conectar con LoRa");
     while (1);
   }
- // Creamos el fichero de los datos en la SD, y escribimos las cabeceras
+  // Creamos el fichero de los datos en la SD, y escribimos las cabeceras
   Fichero = SD.open("cansat.csv", FILE_WRITE);
-   if(Fichero) {
-     Fichero.println("Tiempo(ms), Humedad_Relativa, Temperatura, Presion_Barometrica, AcelerometroX, AcelerometroY, AcelerometroZ, GiroscopioX, GiroscopioY, GiroscopioZ, MagnetometroX, MagnetometroY, MagnetometroZ");
-     Serial.println("Archivo escrito, se escribió la cabecera del csv...");
-     Fichero.close();
-     } else {
-       Serial.println("Error al crear la cabecera");
-      }
-   }
+  if (Fichero) {
+    Fichero.println("Tiempo(ms), Humedad_Relativa, Temperatura, Presion_Barometrica, AcelerometroX, AcelerometroY, AcelerometroZ, GiroscopioX, GiroscopioY, GiroscopioZ, MagnetometroX, MagnetometroY, MagnetometroZ");
+    Serial.println("Archivo escrito, se escribió la cabecera del csv...");
+    Fichero.close();
+  } else {
+    Serial.println("Error al crear la cabecera");
+  }
+}
 
- 
+
 void loop()
 {
+
   // Parseamos el paquete de datos recibido del cansat
   int packetSize = LoRa.parsePacket();
+  String datos = "";
   if (packetSize) {
     // received a packet
     Serial.print("Paquete recibido! ");
 
     // Leer el paquete y mostrarlo por el serial
     while (LoRa.available()) {
-      Serial.print((char)LoRa.read());
+      datos += (char)LoRa.read();
     }
 
     // Imprimir el RSSI del paquete
     Serial.print(" con RSSI ");
     Serial.println(LoRa.packetRssi());
-   
+
     // Guardamos los datos recibidos del cansat en la SD
-   Fichero = SD.open("cansat.csv", FILE_WRITE);
-   if (not Fichero)
-   Serial.println("No se pudo abrir el fichero");
-   else{
-   Fichero.println((char)LoRa.read());
-   Fichero.close();
-   }
-  
-  delay(1000);
-
-  if (WiFi.status() != WL_CONNECTED) {
-    reconnect();
-  }
-
-  if (!tb.connected()) {
-   
-    // Conectar a ThingsBoard
-    Serial.print("Conectando a: ");
-    Serial.print(THINGSBOARD_SERVER);
-    Serial.print(" con el token ");
-    Serial.println(TOKEN);
-    if (!tb.connect(THINGSBOARD_SERVER, TOKEN)) {
-      Serial.println("Error al conectar con thingsboard");
-      return;
+    Fichero = SD.open("cansat.csv", FILE_WRITE);
+    if (not Fichero)
+      Serial.println("No se pudo abrir el fichero");
+    else {
+      Fichero.println(datos);
+      Fichero.close();
     }
+
+    delay(1000);
+
+    /*
+      if (WiFi.status() != WL_CONNECTED) {
+        reconnect();
+      }
+
+      if (!tb.connected()) {
+
+        // Conectar a ThingsBoard
+        Serial.print("Conectando a: ");
+        Serial.print(THINGSBOARD_SERVER);
+        Serial.print(" con el token ");
+        Serial.println(TOKEN);
+        if (!tb.connect(THINGSBOARD_SERVER, TOKEN)) {
+          Serial.println("Error al conectar con thingsboard");
+          return;
+        }
+      }
+
+      // Mandamos los datos
+      Serial.println("Mandando datos...");
+
+      tb.sendTelemetryInt("temperatura", random(1,50));
+      tb.sendTelemetryFloat("humedad", random(1,50));
+
+      tb.loop();
+    */
   }
-
- // Mandamos los datos
-  Serial.println("Mandando datos...");
-
-  tb.sendTelemetryInt("temperatura", random(1,50));
-  tb.sendTelemetryFloat("humedad", random(1,50));
-
-  tb.loop();
 }
 
+/*
 // Funcion para iniciar la WiFi
 void InitWiFi()
 {
@@ -137,3 +144,4 @@ void reconnect() {
     Serial.println("Conectado!");
   }
 }
+*/
