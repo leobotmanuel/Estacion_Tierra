@@ -50,7 +50,7 @@ void setup()
   // Creamos el fichero de los datos en la SD, y escribimos las cabeceras
   Fichero = SD.open("cansat.csv", FILE_WRITE);
   if (Fichero) {
-    Fichero.println("Tiempo(ms), Humedad_Relativa, Temperatura, Presion_Barometrica, AcelerometroX, AcelerometroY, AcelerometroZ, GiroscopioX, GiroscopioY, GiroscopioZ, MagnetometroX, MagnetometroY, MagnetometroZ");
+    Fichero.println("Tiempo(s),AcelerometroX,AcelerometroY,AcelerometroZ,GiroscopioX,GiroscopioY,GiroscopioZ,MagnetometroX,MagnetometroY,MagnetometroZ,PresionGiro(mbar),TemperaturaGiro(degC),AltitudGiro(m)");
     Serial.println("Archivo escrito, se escribió la cabecera del csv...");
     Fichero.close();
   } else {
@@ -77,7 +77,7 @@ void loop()
     // Imprimir el RSSI del paquete
     Serial.print(" con RSSI ");
     Serial.println(LoRa.packetRssi());
-
+    Serial.println(datos);
     // Guardamos los datos recibidos del cansat en la SD
     Fichero = SD.open("cansat.csv", FILE_WRITE);
     if (not Fichero)
@@ -87,15 +87,11 @@ void loop()
       Fichero.close();
     }
 
-    delay(1000);
-
     /*
       if (WiFi.status() != WL_CONNECTED) {
         reconnect();
       }
-
       if (!tb.connected()) {
-
         // Conectar a ThingsBoard
         Serial.print("Conectando a: ");
         Serial.print(THINGSBOARD_SERVER);
@@ -106,13 +102,10 @@ void loop()
           return;
         }
       }
-
       // Mandamos los datos
       Serial.println("Mandando datos...");
-
       tb.sendTelemetryInt("temperatura", random(1,50));
       tb.sendTelemetryFloat("humedad", random(1,50));
-
       tb.loop();
     */
   }
@@ -123,7 +116,6 @@ void loop()
 void InitWiFi()
 {
   Serial.println("Conectando ...");
-
   WiFi.begin(WIFI_AP, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -131,7 +123,6 @@ void InitWiFi()
   }
   Serial.println("Conectado!");
 }
-
 // Funcion para reconectar a WiFi
 void reconnect() {
   status = WiFi.status();
