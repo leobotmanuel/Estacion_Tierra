@@ -50,7 +50,7 @@ void setup()
   // Creamos el fichero de los datos en la SD, y escribimos las cabeceras
   Fichero = SD.open("cansat.csv", FILE_WRITE);
   if (Fichero) {
-    Fichero.println("Tiempo(s),AcelerometroX,AcelerometroY,AcelerometroZ,GiroscopioX,GiroscopioY,GiroscopioZ,MagnetometroX,MagnetometroY,MagnetometroZ,PresionGiro(mbar),TemperaturaGiro(degC),AltitudGiro(m)");
+    Fichero.println("Tiempo(s),AcelerometroX,AcelerometroY,AcelerometroZ,GiroscopioX,GiroscopioY,GiroscopioZ,MagnetometroX,MagnetometroY,MagnetometroZ,PresionGiro(mbar),TemperaturaGiro(degC),AltitudGiro(m),LatitudGPS,LongitudGPS,velocidadGPS,altitudGPS,temperaturaBME,presionBME,humedadBME,altitudBME,CO2,GasesVolatiles,DUV");
     Serial.println("Archivo escrito, se escribió la cabecera del csv...");
     Fichero.close();
   } else {
