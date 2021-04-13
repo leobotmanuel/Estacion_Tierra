@@ -1,138 +1,83 @@
-// ARGONAUTEX2021 estacion de tierra
-
-// Declaramos las librerias
-#include <SD.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
+#include <Adafruit_ST7789.h>
 #include <SPI.h>
+#include <SD.h>
 #include <LoRa.h>
-//#include <PubSubClient.h>
-//#include "ThingsBoard.h"
-//#include <ESP8266WiFi.h>
 
-// Definimos las credenciales de la WiFi
-#define WIFI_AP             "..."
-#define WIFI_PASSWORD       "..."
+#define TFT_CS         2
+#define TFT_RST        7
+#define TFT_DC         6
+#define TFT_MOSI       8
+#define TFT_SCLK       9
 
-// Definimos los parametros de ThingsBoard
-#define TOKEN               "GDKULyqnfmTYOsYj03SN"
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
-#define THINGSBOARD_SERVER  "192.168.1.13"
-#define THINGSBOARD_PORT    8080
-
-//WiFiClient espClient;
-//ThingsBoard tb(espClient);
-//int status = WL_IDLE_STATUS;
-
-// Creamos el fichero de la SD
 File Fichero;
 
-void setup()
-{
-  // Iniciamos el Serial y la WiFi
-  Serial.begin(9600);
-  //WiFi.begin(WIFI_AP, WIFI_PASSWORD);
+int contador_paquetes = 0;
 
-  //InitWiFi();
-  delay(2000);
+void setup(void) {
+
+  pinMode(A4, OUTPUT);
+  digitalWrite(A4, HIGH);
+
+  tft.initR(INITR_BLACKTAB);
+
+  tft.fillScreen(ST77XX_BLACK);
   
-  Serial.print(F("Iniciando SD ..."));
-  if (!SD.begin(9))
+  tft.setCursor(0, 0);
+  tft.setTextColor(ST77XX_GREEN);
+  tft.setTextWrap(true);
+  tft.print("-Distancia del CanSat");
+
+  tft.setCursor(0, 30);
+  tft.print("-Altura del CanSat");
+
+  tft.setCursor(0, 60);
+  tft.print("-Bateria del CanSat");
+
+  tft.setCursor(0, 90);
+  tft.print("-Angulo localizar");
+
+  tft.setCursor(0, 120);
+  tft.print("-Num paquete");
+
+   if (!SD.begin(A4))
   {
-    Serial.println(F("Error al iniciar SD"));
     return;
   }
-  Serial.println(F("Iniciado SD correctamente"));
-
-  // Iniciamos LoRa a una frecuencia de 868 MHz
+  
   if (!LoRa.begin(868E6)) {
-    Serial.println("Error al conectar con LoRa");
     while (1);
   }
-  // Creamos el fichero de los datos en la SD, y escribimos las cabeceras
   Fichero = SD.open("cansat.csv", FILE_WRITE);
   if (Fichero) {
     Fichero.println("Tiempo(s),AcelerometroX,AcelerometroY,AcelerometroZ,GiroscopioX,GiroscopioY,GiroscopioZ,MagnetometroX,MagnetometroY,MagnetometroZ,PresionGiro(mbar),TemperaturaGiro(degC),AltitudGiro(m),LatitudGPS,LongitudGPS,velocidadGPS,altitudGPS,temperaturaBME,presionBME,humedadBME,altitudBME,CO2,GasesVolatiles,DUV");
-    Serial.println("Archivo escrito, se escribió la cabecera del csv...");
     Fichero.close();
-  } else {
-    Serial.println("Error al crear la cabecera");
   }
+  
 }
 
-
-void loop()
-{
-
-  // Parseamos el paquete de datos recibido del cansat
+void loop() {
+  tft.setTextColor(ST77XX_RED);
+  tft.setCursor(0, 135);
+  tft.print(contador_paquetes);
+  delay(5000);
   int packetSize = LoRa.parsePacket();
   String datos = "";
   if (packetSize) {
-    // received a packet
-    Serial.print("Paquete recibido! ");
-
-    // Leer el paquete y mostrarlo por el serial
+    contador_paquetes += 1;
     while (LoRa.available()) {
       datos += (char)LoRa.read();
     }
 
-    // Imprimir el RSSI del paquete
-    Serial.print(" con RSSI ");
-    Serial.println(LoRa.packetRssi());
-    Serial.println(datos);
-    // Guardamos los datos recibidos del cansat en la SD
     Fichero = SD.open("cansat.csv", FILE_WRITE);
-    if (not Fichero)
-      Serial.println("No se pudo abrir el fichero");
-    else {
-      Fichero.println(datos);
-      Fichero.close();
-    }
+    Fichero.println(datos);
+    Fichero.close();
 
-    /*
-      if (WiFi.status() != WL_CONNECTED) {
-        reconnect();
-      }
-      if (!tb.connected()) {
-        // Conectar a ThingsBoard
-        Serial.print("Conectando a: ");
-        Serial.print(THINGSBOARD_SERVER);
-        Serial.print(" con el token ");
-        Serial.println(TOKEN);
-        if (!tb.connect(THINGSBOARD_SERVER, TOKEN)) {
-          Serial.println("Error al conectar con thingsboard");
-          return;
-        }
-      }
-      // Mandamos los datos
-      Serial.println("Mandando datos...");
-      tb.sendTelemetryInt("temperatura", random(1,50));
-      tb.sendTelemetryFloat("humedad", random(1,50));
-      tb.loop();
-    */
+  tft.setCursor(0, 150);
+  tft.print(contador_paquetes);
   }
+  
 }
-
-/*
-// Funcion para iniciar la WiFi
-void InitWiFi()
-{
-  Serial.println("Conectando ...");
-  WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("Conectado!");
-}
-// Funcion para reconectar a WiFi
-void reconnect() {
-  status = WiFi.status();
-  if ( status != WL_CONNECTED) {
-    WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(1000);
-      Serial.print(".");
-    }
-    Serial.println("Conectado!");
-  }
-}
-*/
