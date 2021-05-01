@@ -1,0 +1,101 @@
+#include <PubSubClient.h>
+#include <SPI.h>
+#include <WiFi101.h>
+
+#define TOKEN "ASD"
+
+const char* ssid = "gofionet";
+const char* password = "Saul21052004/";
+const char mqtt_server[] = "192.168.1.13"; 
+const char publishTopic[] = "v1/devices/me/telemetry"; 
+
+WiFiClient mkr1000Client;
+PubSubClient client(mkr1000Client);
+long lastData = 0;
+
+void setup_wifi(){
+
+  delay(10);
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  while( WiFi.status() != WL_CONNECTED){
+
+    delay(500);
+    Serial.print(".");   
+  }
+
+  randomSeed(micros());
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+ 
+}
+
+void reconnect(){
+
+  while(!client.connected()){
+    
+    Serial.print("Attempting MQTT connection ....");
+
+    if (client.connect("ClientID", TOKEN, NULL)) { 
+      
+      Serial.println("Connected to MQTT Broker");
+    }
+
+    else
+    {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println("try again in 5 second");
+      delay(5000);
+    }
+    
+    
+  }
+  
+}
+
+void setup() {
+
+  Serial.begin(9600);
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
+
+}
+
+void loop() {
+
+  if (!client.connected()) {
+    reconnect();
+  }
+
+  client.loop();
+
+  float t = 15;
+  float h = 54;
+
+  String temperature = String(t);
+  String humidity = String(h);
+  
+  String payload = "{\"tempera\":";
+  payload += temperature;
+  payload += ",\"humidity\":";
+  payload += humidity;
+  payload += "}";
+
+  char attributes[1000];
+  long now = millis();
+
+  if(now - lastData > 5000){
+
+    lastData = now;
+    payload.toCharArray(attributes, 1000);
+    client.publish(publishTopic, attributes);
+    Serial.println(attributes);
+  }
+
+}
