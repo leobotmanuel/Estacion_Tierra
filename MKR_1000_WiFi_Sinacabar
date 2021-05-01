@@ -1,0 +1,149 @@
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
+#include <Adafruit_ST7789.h>
+#include <PubSubClient.h>
+#include "ThingsBoard.h"
+#include <SPI.h>
+#include <Wire.h>
+#include <WiFi101.h>
+
+#define TFT_CS         2
+#define TFT_RST        7
+#define TFT_DC         6
+#define TFT_MOSI       8
+#define TFT_SCLK       9
+
+#define TOKEN               "ASD"
+#define THINGSBOARD_SERVER  "192.168.1.13"
+#define THINGSBOARD_PORT    8080
+
+char ssid[] = "iPhone de Francisco Leonardo";        // your network SSID (name)
+char pass[] = "Cansat2021/";
+
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+WiFiClient client;
+
+ThingsBoard tb(client);
+
+int status = WL_IDLE_STATUS;
+int contador_paquetes = 0;
+
+String datos;
+String prov = "";
+String datosthingsboard [10];
+int contador = 0;
+
+void setup(void) {
+  if (WiFi.status() == WL_NO_SHIELD) {
+    Serial.println("WiFi shield not present");
+    // don't continue:
+    while (true);
+  }
+
+  while (status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+    status = WiFi.begin(ssid, pass);
+
+    // wait 10 seconds for connection:
+    delay(10000);
+  }
+  Serial.println("Connected to wifi");
+
+  Wire.begin(4);
+  Wire.onReceive(receiveEvent);
+  tft.initR(INITR_BLACKTAB);
+  tft.fillScreen(ST77XX_BLACK);
+
+  tft.setCursor(0, 0);
+  tft.setTextColor(ST77XX_GREEN);
+  tft.setTextWrap(true);
+  tft.print("-Distancia del CanSat");
+
+  tft.setCursor(0, 30);
+  tft.print("-Altura del CanSat");
+
+  tft.setCursor(0, 60);
+  tft.print("-Bateria del CanSat");
+
+  tft.setCursor(0, 90);
+  tft.print("-Angulo localizar");
+
+  tft.setCursor(0, 120);
+  tft.print("-Num paquete");
+}
+
+void loop() {
+  tft.fillScreen(ST77XX_BLACK);
+
+  tft.setCursor(0, 0);
+  tft.setTextColor(ST77XX_GREEN);
+  tft.setTextWrap(true);
+  tft.print("-Distancia del CanSat");
+
+  tft.setCursor(0, 30);
+  tft.print("-Altura del CanSat");
+
+  tft.setCursor(0, 60);
+  tft.print("-Bateria del CanSat");
+
+  tft.setCursor(0, 90);
+  tft.print("-Angulo localizar");
+
+  tft.setCursor(0, 120);
+  tft.print("-Num paquete");
+  tft.setTextColor(ST77XX_RED);
+  tft.setCursor(0, 135);
+  tft.print(contador_paquetes);
+
+  for (int h = 0; h < datos.length(); h++) {
+    if (datos[h] != ',') {
+      prov = prov + datos[h];
+    } else if (datos[h] == ',') {
+      datosthingsboard [contador] = prov;
+      prov = "";
+      contador ++;
+    }
+  }
+  if (!tb.connected()) {
+    // Conectar a ThingsBoard
+    Serial.print("Conectando a: ");
+    Serial.print(THINGSBOARD_SERVER);
+    Serial.print(" con el token ");
+    Serial.println(TOKEN);
+    if (!tb.connect(THINGSBOARD_SERVER, TOKEN)) {
+      Serial.println("Error al conectar con thingsboard");
+      return;
+    }
+  }
+  // Mandamos los datos
+  Serial.println("Mandando datos...");
+
+  tb.sendTelemetryFloat("LatitudGPS", datosthingsboard[0].toFloat());
+  tb.sendTelemetryFloat("LongitudGPS", datosthingsboard[1].toFloat());
+  tb.sendTelemetryFloat("velocidadGPS", datosthingsboard[2].toFloat());
+  tb.sendTelemetryFloat("altitudGPS", datosthingsboard[3].toFloat());
+  tb.sendTelemetryFloat("temperaturaBME", datosthingsboard[4].toFloat());
+  tb.sendTelemetryFloat("presionBME", datosthingsboard[5].toFloat());
+  tb.sendTelemetryFloat("humedadBME", datosthingsboard[6].toFloat());
+  tb.sendTelemetryFloat("CO2", datosthingsboard[7].toFloat());
+  tb.sendTelemetryFloat("GasesVolatiles", datosthingsboard[8].toFloat());
+  tb.sendTelemetryFloat("DUV", datosthingsboard[9].toFloat());
+
+  tb.loop();
+
+  delay(1000);
+}
+
+
+void receiveEvent(int howMany) {
+  datos = "";
+  while (1 < Wire.available()) // loop through all but the last
+  {
+    char c = Wire.read();
+    datos += c;
+  }
+  Serial.print(datos);
+  contador_paquetes++;
+}
