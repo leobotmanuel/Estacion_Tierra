@@ -1,3 +1,4 @@
+//Incluír librerías
 #include <AES.h>
 #include <Adafruit_GPS.h>
 #include "./printf.h"
@@ -15,13 +16,13 @@ AES aes ;
 File Fichero;
 Adafruit_GPS GPS(&GPSSerial);
 
+//Cosas para el cifrado
 uint32_t timer = millis();
 int contador_paquetes = 0;
 //String cadena = "vamos a probar, 2516.335541865,525,2.22354103,adfg auid.dadgf,uyktasdf,234.23452,3452.23452562gfwef,efqwkj.";
 byte *key = (unsigned char*)"0123456789010123";
 //real iv = iv x2 ex: 01234567 = 0123456701234567
 unsigned long long int my_iv = 36753562;
-
 String prov = "";
 String datos [24];
 int contador = 0;
@@ -37,6 +38,7 @@ void setup ()
   if (!LoRa.begin(868E6)) {
     while (1);
   }
+  //SD
   Fichero = SD.open("cansat.csv", FILE_WRITE);
   if (Fichero) {
     Fichero.println("Tiempo(s),AcelerometroX,AcelerometroY,AcelerometroZ,GiroscopioX,GiroscopioY,GiroscopioZ,MagnetometroX,MagnetometroY,MagnetometroZ,PresionGiro(mbar),TemperaturaGiro(degC),AltitudGiro(m),LatitudGPS,LongitudGPS,velocidadGPS,altitudGPS,temperaturaBME,presionBME,humedadBME,altitudBME,CO2,GasesVolatiles,DUV");
@@ -47,6 +49,7 @@ void setup ()
   while (!Serial) {
     ;
   }
+  //GPS
   Serial.println("Adafruit GPS library basic parsing test!");
   GPS.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
@@ -61,6 +64,7 @@ void setup ()
 void loop ()
 {
   delay(1000);
+  //Recibir por LoRa
   int packetSize = LoRa.parsePacket();
   String cadena = "";
   if (packetSize) {
@@ -68,30 +72,33 @@ void loop ()
     while (LoRa.available()) {
       cadena += (char)LoRa.read();
     }
-    
+    //Guardar en SD
     Fichero = SD.open("cansat.csv", FILE_WRITE);
     Fichero.println(cadena);
     Fichero.close();
   }
 
+  //Pasar datos al otro MKR (el de la WiFi)
   Wire.beginTransmission(4); // transmit to device #4
   Wire.write(cadena.c_str());              // sends one byte  datos.c_str()
   Wire.endTransmission();    // stop transmitting
 
+  //Tamaño de la cadena y cambiar tipo de la cadena (se necesita para descifrar)
   int plainLength = cadena.length();
   int padedLength = plainLength + N_BLOCK - plainLength % N_BLOCK;
   Serial.print("tamaño: ");
   Serial.println(plainLength);
   Serial.println();
-
   const char *plain_ptr = cadena.c_str();
   printf(plain_ptr);
+  //Descifrar
   prekey_test (plain_ptr, padedLength, plainLength) ;
 
+  //Obtener los valores del GPS
   valores_GPS();
 
 
-
+  //Separar la  cadena recibida por LoRa (Para aislar latitud y longitud)
   for (int h = 0; h < cadena.length(); h++) {
     if (cadena[h] != ',') {
       prov = prov + datos[h];
@@ -102,56 +109,52 @@ void loop ()
     }
   }
 
-
+  //Obtener nuestra latitudy la del satélite
   float nuestraLatitud = GPS.lat;
   float nuestraLongitud = GPS.lon;
   String latitud = datos[13];
   String longitud = datos[14];
-  
-  
   float suLatitud = latitud.toFloat();
   float suLongitud = longitud.toFloat();
-
   suLongitud += 180;
   suLatitud += 90;
   nuestraLongitud += 180;
   nuestraLatitud += 90;
-
   Serial.print(suLongitud);
   Serial.println("º (Longitud");
   Serial.print(suLatitud);
   Serial.println("º (Latitud)");
 
-
+  //Diferencia entre las longitudes
   float distlat = (nuestraLatitud - suLatitud);
   float distlon = (nuestraLongitud - suLongitud);
-
   if (distlat < 0){
     distlat *= -1;
   }
   if (distlon < 0){
     distlon *= -1;
   }
-  
   Serial.print(distlat);
   Serial.println("º");
   Serial.print(distlon);
   Serial.println("º");
 
+  //Pasar a kilómetros
   distlat *= 111.3194;
   distlon *= 111.3194;
-
+  
+  //Calcular distancia
   float distancia = sqrt(pow(distlat, 2) + pow(distlon, 2));
   distancia *= 1000;
   Serial.print(distancia);
   Serial.println("m");
   distancia /= 1000;
-  
   Serial.print(distlat);
   Serial.println("km");
   Serial.print(distlon);
   Serial.println("km");
 
+  //Calcular ángulo con respecto al norte (trigonometría)
   float dif = distlat/distancia;
 
   float alpha = acos(dif);
