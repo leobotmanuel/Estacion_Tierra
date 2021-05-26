@@ -178,13 +178,13 @@ void prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
   byte cipher [padedLength] ;
   byte check [padedLength] ;
   unsigned long ms = micros ();
-  aes.set_IV(my_iv);
-  aes.get_IV(iv);
-  aes.do_aes_encrypt((unsigned char*)plain_ptr, plainLength, cipher, key, bits, iv);
+  //aes.set_IV(my_iv);
+  //aes.get_IV(iv);
+  //aes.do_aes_encrypt((unsigned char*)plain_ptr, plainLength, cipher, key, bits, iv);
 
-  Serial.print("Cadena encriptada: ");
-  Serial.println((char *)cipher);
-  Serial.println();
+  //Serial.print("Cadena encriptada: ");
+  //Serial.println((char *)cipher);
+  //Serial.println();
 
   Serial.print("Encryption took: ");
   Serial.println(micros() - ms);
@@ -193,7 +193,7 @@ void prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
   ms = micros ();
   aes.set_IV(my_iv);
   aes.get_IV(iv);
-  aes.do_aes_decrypt(cipher, padedLength, check, key, bits, iv);
+  aes.do_aes_decrypt((unsigned char*)plain_ptr, padedLength, check, key, bits, iv);
 
   Serial.print("Cadena desencriptada: ");
   Serial.println((char *)check);
