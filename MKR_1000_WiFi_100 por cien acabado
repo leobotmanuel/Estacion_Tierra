@@ -1,3 +1,4 @@
+//Incluimos las librerias
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
 #include <Adafruit_ST7789.h>
@@ -6,12 +7,14 @@
 #include <Wire.h>
 #include <WiFi101.h>
 
+//Definimos los pines de la tft
 #define TFT_CS         2
 #define TFT_RST        7
 #define TFT_DC         6
 #define TFT_MOSI       8
 #define TFT_SCLK       9
 
+//Definimos variables para el envio de datos
 #define TOKEN          "ASD"
 
 const char* ssid = "gofionet";
@@ -27,17 +30,21 @@ long lastData = 0;
 int status = WL_IDLE_STATUS;
 int contador_paquetes = 0;
 
+//Variables de datos
 String datos;
 String prov = "";
-String datosthingsboard [10];
+String datosthingsboard [24];
 int contador = 0;
 
 void setup(void) {
   setup_wifi();
   client.setServer(mqtt_server, 1883);
 
+  //Preparamos para recibir datos por wire
   Wire.begin(4);
   Wire.onReceive(receiveEvent);
+
+  
   tft.initR(INITR_BLACKTAB);
   tft.fillScreen(ST77XX_BLACK);
 
@@ -87,6 +94,7 @@ void loop() {
   tft.setCursor(0, 135);
   tft.print(contador_paquetes);
 
+  //Separar los datos recibidos y guardarlos en array datosthingsboard
   for (int h = 0; h < datos.length(); h++) {
     if (datos[h] != ',') {
       prov = prov + datos[h];
@@ -142,7 +150,7 @@ void loop() {
   delay(1000);
 }
 
-
+//Funcion de recepcion de datos por wire
 void receiveEvent(int howMany) {
   datos = "";
   while (1 < Wire.available()) // loop through all but the last
