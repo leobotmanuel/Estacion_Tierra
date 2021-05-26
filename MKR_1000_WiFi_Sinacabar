@@ -2,7 +2,6 @@
 #include <Adafruit_ST7735.h>
 #include <Adafruit_ST7789.h>
 #include <PubSubClient.h>
-#include "ThingsBoard.h"
 #include <SPI.h>
 #include <Wire.h>
 #include <WiFi101.h>
@@ -13,17 +12,17 @@
 #define TFT_MOSI       8
 #define TFT_SCLK       9
 
-#define TOKEN               "ASD"
-#define THINGSBOARD_SERVER  "192.168.1.13"
-#define THINGSBOARD_PORT    8080
+#define TOKEN          "ASD"
 
-char ssid[] = "iPhone de Francisco Leonardo";        // your network SSID (name)
-char pass[] = "Cansat2021/";
+const char* ssid = "gofionet";
+const char* password = "Saul21052004/";
+const char mqtt_server[] = "192.168.1.13"; 
+const char publishTopic[] = "v1/devices/me/telemetry"; 
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
-WiFiClient client;
-
-ThingsBoard tb(client);
+WiFiClient mkr1000Client;
+PubSubClient client(mkr1000Client);
+long lastData = 0;
 
 int status = WL_IDLE_STATUS;
 int contador_paquetes = 0;
@@ -34,22 +33,8 @@ String datosthingsboard [10];
 int contador = 0;
 
 void setup(void) {
-  if (WiFi.status() == WL_NO_SHIELD) {
-    Serial.println("WiFi shield not present");
-    // don't continue:
-    while (true);
-  }
-
-  while (status != WL_CONNECTED) {
-    Serial.print("Attempting to connect to SSID: ");
-    Serial.println(ssid);
-    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-    status = WiFi.begin(ssid, pass);
-
-    // wait 10 seconds for connection:
-    delay(10000);
-  }
-  Serial.println("Connected to wifi");
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
 
   Wire.begin(4);
   Wire.onReceive(receiveEvent);
@@ -75,6 +60,11 @@ void setup(void) {
 }
 
 void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+  
   tft.fillScreen(ST77XX_BLACK);
 
   tft.setCursor(0, 0);
@@ -106,33 +96,49 @@ void loop() {
       contador ++;
     }
   }
-  if (!tb.connected()) {
-    // Conectar a ThingsBoard
-    Serial.print("Conectando a: ");
-    Serial.print(THINGSBOARD_SERVER);
-    Serial.print(" con el token ");
-    Serial.println(TOKEN);
-    if (!tb.connect(THINGSBOARD_SERVER, TOKEN)) {
-      Serial.println("Error al conectar con thingsboard");
-      return;
-    }
-  }
+
   // Mandamos los datos
-  Serial.println("Mandando datos...");
+  String latitud = String(datosthingsboard[0]);
+  String longitud = String(datosthingsboard[1]);
+  String velocidad = String(datosthingsboard[2]);
+  String altitud = String(datosthingsboard[3]);
+  String temperatura = String(datosthingsboard[4]);
+  String presion = String(datosthingsboard[5]);
+  String humedad = String(datosthingsboard[6]);
+  String CO2 = String(datosthingsboard[7]);
+  String gases = String(datosthingsboard[8]);
+  String duv = String(datosthingsboard[9]);
 
-  tb.sendTelemetryFloat("LatitudGPS", datosthingsboard[0].toFloat());
-  tb.sendTelemetryFloat("LongitudGPS", datosthingsboard[1].toFloat());
-  tb.sendTelemetryFloat("velocidadGPS", datosthingsboard[2].toFloat());
-  tb.sendTelemetryFloat("altitudGPS", datosthingsboard[3].toFloat());
-  tb.sendTelemetryFloat("temperaturaBME", datosthingsboard[4].toFloat());
-  tb.sendTelemetryFloat("presionBME", datosthingsboard[5].toFloat());
-  tb.sendTelemetryFloat("humedadBME", datosthingsboard[6].toFloat());
-  tb.sendTelemetryFloat("CO2", datosthingsboard[7].toFloat());
-  tb.sendTelemetryFloat("GasesVolatiles", datosthingsboard[8].toFloat());
-  tb.sendTelemetryFloat("DUV", datosthingsboard[9].toFloat());
+  String payload = "{\"temperaturaBME\":";
+  payload += temperatura;
+  payload += ",\"humedadBME\":";
+  payload += humedad;
+  payload += ",\"LatitudGPS\":";
+  payload += latitud;
+  payload += ",\"LongitudGPS\":";
+  payload += longitud;
+  payload += ",\"velocidadGPS\":";
+  payload += velocidad;
+  payload += ",\"altitudGPS\":";
+  payload += altitud;
+  payload += ",\"CO2\":";
+  payload += CO2;
+  payload += ",\"GasesVolatiles\":";
+  payload += gases;
+  payload += ",\"DUV\":";
+  payload += duv;
+  payload += "}";
 
-  tb.loop();
+  char attributes[1000];
+  long now = millis();
 
+  if(now - lastData > 5000){
+
+    lastData = now;
+    payload.toCharArray(attributes, 1000);
+    client.publish(publishTopic, attributes);
+    Serial.println(attributes);
+  }
   delay(1000);
 }
 
@@ -146,4 +152,50 @@ void receiveEvent(int howMany) {
   }
   Serial.print(datos);
   contador_paquetes++;
+}
+
+void setup_wifi(){
+
+  delay(10);
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  while( WiFi.status() != WL_CONNECTED){
+
+    delay(500);
+    Serial.print(".");   
+  }
+
+  randomSeed(micros());
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+ 
+}
+
+void reconnect(){
+
+  while(!client.connected()){
+    
+    Serial.print("Attempting MQTT connection ....");
+
+    if (client.connect("ClientID", TOKEN, NULL)) { 
+      
+      Serial.println("Connected to MQTT Broker");
+    }
+
+    else
+    {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println("try again in 5 second");
+      delay(5000);
+    }
+    
+    
+  }
+  
 }
