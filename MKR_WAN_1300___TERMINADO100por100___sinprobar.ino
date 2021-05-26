@@ -72,10 +72,6 @@ void loop ()
     while (LoRa.available()) {
       cadena += (char)LoRa.read();
     }
-    //Guardar en SD
-    Fichero = SD.open("cansat.csv", FILE_WRITE);
-    Fichero.println(cadena);
-    Fichero.close();
   }
 
   //Pasar datos al otro MKR (el de la WiFi)
@@ -92,7 +88,13 @@ void loop ()
   const char *plain_ptr = cadena.c_str();
   printf(plain_ptr);
   //Descifrar
-  prekey_test (plain_ptr, padedLength, plainLength) ;
+  String cadenaDescifrada = prekey_test (plain_ptr, padedLength, plainLength) ;
+
+  
+  //Guardar en SD
+  Fichero = SD.open("cansat.csv", FILE_WRITE);
+  Fichero.println(cadenaDescifrada);
+  Fichero.close();
 
   //Obtener los valores del GPS
   valores_GPS();
@@ -166,7 +168,7 @@ void loop ()
 }
 
 
-void prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
+String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
 {
   Serial.print("Cadena original: ");
   Serial.println(plain_ptr);
@@ -186,11 +188,11 @@ void prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
   //Serial.println((char *)cipher);
   //Serial.println();
 
-  Serial.print("Encryption took: ");
-  Serial.println(micros() - ms);
-  Serial.println();
+  //Serial.print("Encryption took: ");
+  //Serial.println(micros() - ms);
+  //Serial.println();
 
-  ms = micros ();
+  //ms = micros ();
   aes.set_IV(my_iv);
   aes.get_IV(iv);
   aes.do_aes_decrypt((unsigned char*)plain_ptr, padedLength, check, key, bits, iv);
@@ -204,12 +206,14 @@ void prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
   Serial.println();
 
   Serial.print("\n============================================================\n");
+  return (char *)check;
 }
 
 
-void prekey_test (const char *plain_ptr, int plainLength, int padedLength)
+String prekey_test (const char *plain_ptr, int plainLength, int padedLength)
 {
-  prekey (128, plain_ptr, plainLength, padedLength) ;
+  String resultado = prekey (128, plain_ptr, plainLength, padedLength) ;
+  return resultado;
 }
 
 void valores_GPS () {
