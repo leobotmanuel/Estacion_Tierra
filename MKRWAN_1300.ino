@@ -1,5 +1,5 @@
 //Incluír librerías
-#include <AES.h>
+//#include <AES.h>
 #include <Adafruit_GPS.h>
 #include "./printf.h"
 #include <Adafruit_GFX.h>
@@ -12,7 +12,7 @@
 #define GPSSerial Serial2
 #define GPSECHO false
 
-AES aes ;
+//AES aes ;
 File Fichero;
 Adafruit_GPS GPS(&GPSSerial);
 
@@ -80,7 +80,7 @@ void loop ()
   Wire.endTransmission();    // stop transmitting
 
   //Tamaño de la cadena y cambiar tipo de la cadena (se necesita para descifrar)
-  int plainLength = cadena.length();
+  /*int plainLength = cadena.length();
   int padedLength = plainLength + N_BLOCK - plainLength % N_BLOCK;
   Serial.print("tamaño: ");
   Serial.println(plainLength);
@@ -89,7 +89,7 @@ void loop ()
   printf(plain_ptr);
   //Descifrar
   String cadenaDescifrada = prekey_test (plain_ptr, padedLength, plainLength) ;
-
+*/
   
   //Guardar en SD
   Fichero = SD.open("cansat.csv", FILE_WRITE);
@@ -167,7 +167,7 @@ void loop ()
   Serial.print("\n");
 }
 
-
+/*
 String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
 {
   Serial.print("Cadena original: ");
@@ -193,6 +193,7 @@ String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength
   //Serial.println();
 
   //ms = micros ();
+  
   aes.set_IV(my_iv);
   aes.get_IV(iv);
   aes.do_aes_decrypt((unsigned char*)plain_ptr, padedLength, check, key, bits, iv);
@@ -207,6 +208,7 @@ String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength
 
   Serial.print("\n============================================================\n");
   return (char *)check;
+  */
 }
 
 
