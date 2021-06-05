@@ -1,7 +1,7 @@
 //Incluír librerías
 //#include <AES.h>
-#include <Adafruit_GPS.h>
-#include "./printf.h"
+//#include <Adafruit_GPS.h>
+//#include "./printf.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
 #include <SPI.h>
@@ -9,12 +9,12 @@
 #include <LoRa.h>
 #include <Wire.h>
 
-#define GPSSerial Serial2
-#define GPSECHO false
+//#define GPSSerial Serial2
+//#define GPSECHO false
 
 //AES aes ;
 File Fichero;
-Adafruit_GPS GPS(&GPSSerial);
+//Adafruit_GPS GPS(&GPSSerial);
 
 //Cosas para el cifrado
 uint32_t timer = millis();
@@ -27,6 +27,8 @@ String prov = "";
 String datos [24];
 int contador = 0;
 
+//void valores_GPS();
+
 void setup ()
 {
   Wire.begin();
@@ -35,7 +37,12 @@ void setup ()
     return;
   }
 
+  
+  Serial.begin (9600);
+  while (!Serial);
+  
   if (!LoRa.begin(868E6)) {
+    Serial.println("Error!!!");
     while (1);
   }
   //SD
@@ -45,35 +52,35 @@ void setup ()
     Fichero.close();
   }
 
-  Serial.begin (115200);
-  while (!Serial) {
-    ;
-  }
+  
   //GPS
-  Serial.println("Adafruit GPS library basic parsing test!");
-  GPS.begin(9600);
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
-  GPS.sendCommand(PGCMD_ANTENNA);
-  delay(1000);
-  GPSSerial.println(PMTK_Q_RELEASE);
-  printf_begin();
-  delay(1000);
+  //Serial.println("Adafruit GPS library basic parsing test!");
+  //GPS.begin(9600);
+  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  //GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
+  //GPS.sendCommand(PGCMD_ANTENNA);
+  //delay(1000);
+  //GPSSerial.println(PMTK_Q_RELEASE);
+  //printf_begin();
+  //delay(1000);
 }
 
 void loop ()
 {
-  delay(1000);
+  //Serial.println("loop");
+ 
   //Recibir por LoRa
   int packetSize = LoRa.parsePacket();
   String cadena = "";
   if (packetSize) {
-    contador_paquetes += 1;
+    contador_paquetes ++;
     while (LoRa.available()) {
       cadena += (char)LoRa.read();
+      //Serial.println((char)LoRa.read());
     }
+    Serial.println(cadena);
   }
-
+  
   //Pasar datos al otro MKR (el de la WiFi)
   Wire.beginTransmission(4); // transmit to device #4
   Wire.write(cadena.c_str());              // sends one byte  datos.c_str()
@@ -93,11 +100,11 @@ void loop ()
   
   //Guardar en SD
   Fichero = SD.open("cansat.csv", FILE_WRITE);
-  Fichero.println(cadenaDescifrada);
-  Fichero.close();
-
+  Fichero.println(cadena);
+  Fichero.close();/*
+  
   //Obtener los valores del GPS
-  valores_GPS();
+  //valores_GPS();
 
 
   //Separar la  cadena recibida por LoRa (Para aislar latitud y longitud)
@@ -109,9 +116,10 @@ void loop ()
       prov = "";
       contador ++;
     }
-  }
-
-  //Obtener nuestra latitudy la del satélite
+  }*/
+}
+/*
+  //Obtener nuestra latitud y la del satélite
   float nuestraLatitud = GPS.lat;
   float nuestraLongitud = GPS.lon;
   String latitud = datos[13];
@@ -166,7 +174,7 @@ void loop ()
   
   Serial.print("\n");
 }
-
+*/
 /*
 String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
 {
@@ -208,7 +216,7 @@ String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength
 
   Serial.print("\n============================================================\n");
   return (char *)check;
-  */
+  
 }
 
 
@@ -217,8 +225,9 @@ String prekey_test (const char *plain_ptr, int plainLength, int padedLength)
   String resultado = prekey (128, plain_ptr, plainLength, padedLength) ;
   return resultado;
 }
+*/
 
-void valores_GPS () {
+/*void valores_GPS () {
   char c = GPS.read();
   if (GPSECHO)
     if (c) Serial.print(c);
@@ -265,4 +274,4 @@ void valores_GPS () {
       Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
     }
   }
-}
+}*/
