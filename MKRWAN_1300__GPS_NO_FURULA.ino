@@ -37,10 +37,10 @@ void setup ()
     return;
   }
 
-  
+
   Serial.begin (9600);
   while (!Serial);
-  
+
   if (!LoRa.begin(868E6)) {
     Serial.println("Error!!!");
     while (1);
@@ -52,7 +52,7 @@ void setup ()
     Fichero.close();
   }
 
-  
+
   //GPS
   //Serial.println("Adafruit GPS library basic parsing test!");
   //GPS.begin(9600);
@@ -68,7 +68,7 @@ void setup ()
 void loop ()
 {
   //Serial.println("loop");
- 
+
   //Recibir por LoRa
   int packetSize = LoRa.parsePacket();
   String cadena = "";
@@ -79,30 +79,31 @@ void loop ()
       //Serial.println((char)LoRa.read());
     }
     Serial.println(cadena);
+    Wire.beginTransmission(4); // transmit to device #4
+    Wire.write(cadena.c_str());              // sends one byte  datos.c_str()
+    Wire.endTransmission();
   }
-  
+
   //Pasar datos al otro MKR (el de la WiFi)
-  Wire.beginTransmission(4); // transmit to device #4
-  Wire.write(cadena.c_str());              // sends one byte  datos.c_str()
-  Wire.endTransmission();    // stop transmitting
+  // stop transmitting
 
   //Tamaño de la cadena y cambiar tipo de la cadena (se necesita para descifrar)
   /*int plainLength = cadena.length();
-  int padedLength = plainLength + N_BLOCK - plainLength % N_BLOCK;
-  Serial.print("tamaño: ");
-  Serial.println(plainLength);
-  Serial.println();
-  const char *plain_ptr = cadena.c_str();
-  printf(plain_ptr);
-  //Descifrar
-  String cadenaDescifrada = prekey_test (plain_ptr, padedLength, plainLength) ;
-*/
-  
+    int padedLength = plainLength + N_BLOCK - plainLength % N_BLOCK;
+    Serial.print("tamaño: ");
+    Serial.println(plainLength);
+    Serial.println();
+    const char *plain_ptr = cadena.c_str();
+    printf(plain_ptr);
+    //Descifrar
+    String cadenaDescifrada = prekey_test (plain_ptr, padedLength, plainLength) ;
+  */
+
   //Guardar en SD
   Fichero = SD.open("cansat.csv", FILE_WRITE);
   Fichero.println(cadena);
   Fichero.close();/*
-  
+
   //Obtener los valores del GPS
   //valores_GPS();
 
@@ -152,7 +153,7 @@ void loop ()
   //Pasar a kilómetros
   distlat *= 111.3194;
   distlon *= 111.3194;
-  
+
   //Calcular distancia
   float distancia = sqrt(pow(distlat, 2) + pow(distlon, 2));
   distancia *= 1000;
@@ -170,14 +171,14 @@ void loop ()
   float alpha = acos(dif);
   float angulo = (alpha*180)/PI;
   Serial.print(angulo);
-  Serial.println("º con respecto al norte");  
-  
+  Serial.println("º con respecto al norte");
+
   Serial.print("\n");
-}
+  }
 */
 /*
-String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
-{
+  String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength)
+  {
   Serial.print("Cadena original: ");
   Serial.println(plain_ptr);
   Serial.println();
@@ -201,7 +202,7 @@ String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength
   //Serial.println();
 
   //ms = micros ();
-  
+
   aes.set_IV(my_iv);
   aes.get_IV(iv);
   aes.do_aes_decrypt((unsigned char*)plain_ptr, padedLength, check, key, bits, iv);
@@ -216,15 +217,15 @@ String prekey (int bits, const char *plain_ptr, int plainLength, int padedLength
 
   Serial.print("\n============================================================\n");
   return (char *)check;
-  
-}
+
+  }
 
 
-String prekey_test (const char *plain_ptr, int plainLength, int padedLength)
-{
+  String prekey_test (const char *plain_ptr, int plainLength, int padedLength)
+  {
   String resultado = prekey (128, plain_ptr, plainLength, padedLength) ;
   return resultado;
-}
+  }
 */
 
 /*void valores_GPS () {
@@ -274,4 +275,4 @@ String prekey_test (const char *plain_ptr, int plainLength, int padedLength)
       Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
     }
   }
-}*/
+  }*/
