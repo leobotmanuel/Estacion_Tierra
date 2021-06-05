@@ -17,10 +17,10 @@
 //Definimos variables para el envio de datos
 #define TOKEN          "ASD"
 
-const char* ssid = "gofionet";
-const char* password = "Saul21052004/";
-const char mqtt_server[] = "192.168.1.13"; 
-const char publishTopic[] = "v1/devices/me/telemetry"; 
+const char* ssid = "iPhone de Francisco Leonardo";
+const char* password = "Cansat2021/";
+const char mqtt_server[] = "172.20.10.2";
+const char publishTopic[] = "v1/devices/me/telemetry";
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 WiFiClient mkr1000Client;
@@ -37,11 +37,16 @@ String datosthingsboard [24];
 int contador = 0;
 
 void setup(void) {
+  Serial.begin(9600);
+  while(!Serial);
+  
   //Preparamos para recibir datos por wire
   Wire.begin(4);
   Wire.onReceive(receiveEvent);
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
 
-  
+
   tft.initR(INITR_BLACKTAB);
   tft.fillScreen(ST77XX_BLACK);
 
@@ -62,8 +67,6 @@ void setup(void) {
   tft.setCursor(0, 120);
   tft.print("-Num paquete");
 
-  setup_wifi();
-  client.setServer(mqtt_server, 1883);
 }
 
 void loop() {
@@ -71,7 +74,7 @@ void loop() {
     reconnect();
   }
   client.loop();
-  
+
   tft.fillScreen(ST77XX_BLACK);
 
   tft.setCursor(0, 0);
@@ -140,7 +143,7 @@ void loop() {
   char attributes[1000];
   long now = millis();
 
-  if(now - lastData > 5000){
+  if (now - lastData > 5000) {
 
     lastData = now;
     payload.toCharArray(attributes, 1000);
@@ -152,28 +155,30 @@ void loop() {
 
 //Funcion de recepcion de datos por wire
 void receiveEvent(int howMany) {
+  Serial.print("Wire funciona... o no :/");
   datos = "";
   while (1 < Wire.available()) // loop through all but the last
   {
     char c = Wire.read();
     datos += c;
   }
-  Serial.print(datos);
+  Serial.println(datos);
   contador_paquetes++;
 }
 
-void setup_wifi(){
+void setup_wifi() {
 
   delay(10);
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
+  Serial.print("Sigo funcionando...");
 
-  while( WiFi.status() != WL_CONNECTED){
+  while ( WiFi.status() != WL_CONNECTED) {
 
     delay(500);
-    Serial.print(".");   
+    Serial.print(".");
   }
 
   randomSeed(micros());
@@ -181,17 +186,17 @@ void setup_wifi(){
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
- 
+
 }
 
-void reconnect(){
+void reconnect() {
 
-  while(!client.connected()){
-    
+  while (!client.connected()) {
+
     Serial.print("Attempting MQTT connection ....");
 
-    if (client.connect("ClientID", TOKEN, NULL)) { 
-      
+    if (client.connect("ClientID", TOKEN, NULL)) {
+
       Serial.println("Connected to MQTT Broker");
     }
 
@@ -202,8 +207,8 @@ void reconnect(){
       Serial.println("try again in 5 second");
       delay(5000);
     }
-    
-    
+
+
   }
-  
+
 }
