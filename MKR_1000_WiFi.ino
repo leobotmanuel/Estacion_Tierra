@@ -104,16 +104,13 @@ Serial.println(datos);
   }
 
   // Mandamos los datos
-  String latitud = String(datosthingsboard[0]);
-  String longitud = String(datosthingsboard[1]);
-  String velocidad = String(datosthingsboard[2]);
+  String latitud = String(datosthingsboard[4]);
+  String longitud = String(datosthingsboard[5]);
+  String velocidad = String(datosthingsboard[6]);
   String altitud = String(datosthingsboard[3]);
-  String temperatura = String(datosthingsboard[4]);
-  String presion = String(datosthingsboard[5]);
-  String humedad = String(datosthingsboard[6]);
-  String CO2 = String(datosthingsboard[7]);
-  String gases = String(datosthingsboard[8]);
-  String duv = String(datosthingsboard[9]);
+  String temperatura = String(datosthingsboard[0]);
+  String presion = String(datosthingsboard[1]);
+  String duv = String(datosthingsboard[7]);
 
   String payload = "{\"temperaturaBME\":";
   payload += temperatura;
