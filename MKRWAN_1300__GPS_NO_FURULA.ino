@@ -3,7 +3,6 @@
 //#include <Adafruit_GPS.h>
 //#include "./printf.h"
 #include <Adafruit_GFX.h>
-#include <Adafruit_ST7789.h>
 #include <SPI.h>
 #include <SD.h>
 #include <LoRa.h>
@@ -16,13 +15,9 @@
 File Fichero;
 //Adafruit_GPS GPS(&GPSSerial);
 
-//Cosas para el cifrado
-uint32_t timer = millis();
+
 int contador_paquetes = 0;
 //String cadena = "vamos a probar, 2516.335541865,525,2.22354103,adfg auid.dadgf,uyktasdf,234.23452,3452.23452562gfwef,efqwkj.";
-byte *key = (unsigned char*)"0123456789010123";
-//real iv = iv x2 ex: 01234567 = 0123456701234567
-unsigned long long int my_iv = 36753562;
 String prov = "";
 String datos [24];
 int contador = 0;
@@ -76,12 +71,12 @@ void loop ()
     contador_paquetes ++;
     while (LoRa.available()) {
       cadena += (char)LoRa.read();
-      //Serial.println((char)LoRa.read());
     }
     Serial.println(cadena);
     Wire.beginTransmission(4); // transmit to device #4
     Wire.write(cadena.c_str());              // sends one byte  datos.c_str()
     Wire.endTransmission();
+    Serial.println("enviado por wire");
   }
 
   //Pasar datos al otro MKR (el de la WiFi)
