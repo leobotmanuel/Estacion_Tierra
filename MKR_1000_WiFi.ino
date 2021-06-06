@@ -31,6 +31,8 @@ int status = WL_IDLE_STATUS;
 int contador_paquetes = 0;
 
 //Variables de datos
+boolean flagRx = false;
+char buf[40];
 String datos;
 String prov = "";
 String datosthingsboard [24];
@@ -71,18 +73,19 @@ void setup(void) {
 
 void receiveEvent(int howMany)
 {
-  while(Wire.available()) // loop through all but the last
+int i;
+  for (i=0; i<howMany; i++)
   {
-    char c = Wire.read(); // receive byte as a character
-    Serial.print(c);
-
-    
+    buf[i] = Wire.read();
+  }
+  buf[i] = '\0';
   }
   
      // print the integer
-}
+
 
 void loop() {
+datos = String(buf);
 Serial.println(datos);
   if (!client.connected()) {
     reconnect();
