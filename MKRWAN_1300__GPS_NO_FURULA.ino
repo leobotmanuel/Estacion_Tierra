@@ -67,14 +67,18 @@ void loop ()
   //Recibir por LoRa
   int packetSize = LoRa.parsePacket();
   String cadena = "";
+  String cadenados = "";
   if (packetSize) {
     contador_paquetes ++;
     while (LoRa.available()) {
       cadena += (char)LoRa.read();
     }
-    Serial.println(cadena);
+    for (int u = 0;u<31;u++){
+      cadenados += cadena[u];
+      }
+    Serial.println(cadenados);
     Wire.beginTransmission(4); // transmit to device #4
-    Wire.write(cadena.c_str());              // sends one byte  datos.c_str()
+    Wire.write(cadenados.c_str());              // sends one byte  datos.c_str()
     Wire.endTransmission();
     Serial.println("enviado por wire");
   }
@@ -98,11 +102,8 @@ void loop ()
   Fichero = SD.open("cansat.csv", FILE_WRITE);
   Fichero.println(cadena);
   Fichero.close();/*
-
   //Obtener los valores del GPS
   //valores_GPS();
-
-
   //Separar la  cadena recibida por LoRa (Para aislar latitud y longitud)
   for (int h = 0; h < cadena.length(); h++) {
     if (cadena[h] != ',') {
@@ -130,7 +131,6 @@ void loop ()
   Serial.println("º (Longitud");
   Serial.print(suLatitud);
   Serial.println("º (Latitud)");
-
   //Diferencia entre las longitudes
   float distlat = (nuestraLatitud - suLatitud);
   float distlon = (nuestraLongitud - suLongitud);
@@ -144,11 +144,9 @@ void loop ()
   Serial.println("º");
   Serial.print(distlon);
   Serial.println("º");
-
   //Pasar a kilómetros
   distlat *= 111.3194;
   distlon *= 111.3194;
-
   //Calcular distancia
   float distancia = sqrt(pow(distlat, 2) + pow(distlon, 2));
   distancia *= 1000;
@@ -159,15 +157,12 @@ void loop ()
   Serial.println("km");
   Serial.print(distlon);
   Serial.println("km");
-
   //Calcular ángulo con respecto al norte (trigonometría)
   float dif = distlat/distancia;
-
   float alpha = acos(dif);
   float angulo = (alpha*180)/PI;
   Serial.print(angulo);
   Serial.println("º con respecto al norte");
-
   Serial.print("\n");
   }
 */
@@ -177,7 +172,6 @@ void loop ()
   Serial.print("Cadena original: ");
   Serial.println(plain_ptr);
   Serial.println();
-
   aes.iv_inc();
   byte iv [N_BLOCK] ;
   byte plain_p[padedLength];
@@ -187,35 +181,25 @@ void loop ()
   //aes.set_IV(my_iv);
   //aes.get_IV(iv);
   //aes.do_aes_encrypt((unsigned char*)plain_ptr, plainLength, cipher, key, bits, iv);
-
   //Serial.print("Cadena encriptada: ");
   //Serial.println((char *)cipher);
   //Serial.println();
-
   //Serial.print("Encryption took: ");
   //Serial.println(micros() - ms);
   //Serial.println();
-
   //ms = micros ();
-
   aes.set_IV(my_iv);
   aes.get_IV(iv);
   aes.do_aes_decrypt((unsigned char*)plain_ptr, padedLength, check, key, bits, iv);
-
   Serial.print("Cadena desencriptada: ");
   Serial.println((char *)check);
   Serial.println();
-
   Serial.print("Decryption took: ");
   Serial.println(micros() - ms);
   Serial.println();
-
   Serial.print("\n============================================================\n");
   return (char *)check;
-
   }
-
-
   String prekey_test (const char *plain_ptr, int plainLength, int padedLength)
   {
   String resultado = prekey (128, plain_ptr, plainLength, padedLength) ;
