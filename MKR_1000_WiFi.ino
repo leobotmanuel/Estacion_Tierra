@@ -17,9 +17,9 @@
 //Definimos variables para el envio de datos
 #define TOKEN          "ASD"
 
-const char* ssid = "iPhone de Francisco Leonardo";
-const char* password = "Cansat2021/";
-const char mqtt_server[] = "172.20.10.2";
+const char* ssid = "gofionet";
+const char* password = "Saul21052004/";
+const char mqtt_server[] = "192.168.1.13";
 const char publishTopic[] = "v1/devices/me/telemetry";
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
@@ -69,35 +69,27 @@ void setup(void) {
 
 }
 
+void receiveEvent(int howMany)
+{
+  while(Wire.available()) // loop through all but the last
+  {
+    char c = Wire.read(); // receive byte as a character
+    Serial.print(c);
+
+    
+  }
+  
+     // print the integer
+}
+
 void loop() {
+Serial.println(datos);
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
 
-  tft.fillScreen(ST77XX_BLACK);
 
-  tft.setCursor(0, 0);
-  tft.setTextColor(ST77XX_GREEN);
-  tft.setTextWrap(true);
-  tft.print("-Distancia del CanSat");
-
-  tft.setCursor(0, 30);
-  tft.print("-Altura del CanSat");
-
-  tft.setCursor(0, 60);
-  tft.print("-Bateria del CanSat");
-
-  tft.setCursor(0, 90);
-  tft.print("-Angulo localizar");
-
-  tft.setCursor(0, 120);
-  tft.print("-Num paquete");
-  tft.setTextColor(ST77XX_RED);
-  tft.setCursor(0, 135);
-  tft.print(contador_paquetes);
-
-  //Separar los datos recibidos y guardarlos en array datosthingsboard
   for (int h = 0; h < datos.length(); h++) {
     if (datos[h] != ',') {
       prov = prov + datos[h];
@@ -150,21 +142,36 @@ void loop() {
     client.publish(publishTopic, attributes);
     Serial.println(attributes);
   }
-  delay(1000);
+  
+/*
+  tft.fillScreen(ST77XX_BLACK);
+
+  tft.setCursor(0, 0);
+  tft.setTextColor(ST77XX_GREEN);
+  tft.setTextWrap(true);
+  tft.print("-Distancia del CanSat");
+
+  tft.setCursor(0, 30);
+  tft.print("-Altura del CanSat");
+
+  tft.setCursor(0, 60);
+  tft.print("-Bateria del CanSat");
+
+  tft.setCursor(0, 90);
+  tft.print("-Angulo localizar");
+
+  tft.setCursor(0, 120);
+  tft.print("-Num paquete");
+  tft.setTextColor(ST77XX_RED);
+  tft.setCursor(0, 135);
+  tft.print(contador_paquetes);
+  */
+  delay(3000);
+
 }
 
 //Funcion de recepcion de datos por wire
-void receiveEvent(int howMany) {
-  Serial.print("Wire funciona... o no :/");
-  datos = "";
-  while (1 < Wire.available()) // loop through all but the last
-  {
-    char c = Wire.read();
-    datos += c;
-  }
-  Serial.println(datos);
-  contador_paquetes++;
-}
+
 
 void setup_wifi() {
 
