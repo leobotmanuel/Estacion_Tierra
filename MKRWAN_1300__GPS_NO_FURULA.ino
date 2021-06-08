@@ -26,6 +26,7 @@ int contador = 0;
 
 void setup ()
 {
+  Wire.setClock(100000);
   Wire.begin();
   if (!SD.begin(3))
   {
