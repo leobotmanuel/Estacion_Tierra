@@ -43,6 +43,7 @@ void setup(void) {
   while(!Serial);
   
   //Preparamos para recibir datos por wire
+  Wire.setClock(100000);
   Wire.begin(4);
   Wire.onReceive(receiveEvent);
   setup_wifi();
