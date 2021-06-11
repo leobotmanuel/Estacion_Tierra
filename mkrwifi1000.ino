@@ -50,10 +50,10 @@ void loop() {
         contador ++;
       }
     }
-    String altitud = String(datosthingsboard[4]);
-    String temperatura = String(datosthingsboard[1]);
-    String presion = String(datosthingsboard[2]);
-    String duv = String(datosthingsboard[5]);
+    String altitud = String(datosthingsboard[3]);
+    String temperatura = String(datosthingsboard[0]);
+    String presion = String(datosthingsboard[1]);
+    String duv = String(datosthingsboard[4]);
 
     String payload = "{\"temperaturaBME\":";
     payload += temperatura;
@@ -76,6 +76,7 @@ void loop() {
       Serial.println(attributes);
     }
     completo = false;
+    delay(3000);
   }
 }
 
@@ -94,7 +95,7 @@ void receiveEvent(int howMany)
 
 void setup_wifi() {
 
-  delay(10);
+  delay(1000);
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
