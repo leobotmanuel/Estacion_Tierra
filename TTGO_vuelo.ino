@@ -1,5 +1,4 @@
 #include <LoRa.h>
-#include <Wire.h>
 #include <SPI.h>
 
 #include <Adafruit_GFX.h>
@@ -60,7 +59,7 @@ void setup()
   display.print("CONTROL VUELO");
   display.display();
 }
-
+   
 void loop() 
 {
   int joy = analogRead(A1);
@@ -80,24 +79,34 @@ void loop()
   {
   
     angulo2 = map(joy, 2749, 4095, 0, 45);
-    
+  
+     
   }else{
     
     angulo2 = 0;
-    
+   
   }
+  
+  String ang1 = String(angulo1);
+  String ang2 = String(angulo2);
+  
   Serial.println(joy);
-  Serial.println(angulo1);
-  Serial.println(angulo2);
+  Serial.println(ang1);
+  Serial.println(ang2);
 
   Serial.print("Mandando paquete: ");
   Serial.println(counter);
+  String cadena;
+ cadena.concat("puto el que lo lea");
+ cadena.concat(","); 
+ cadena.concat(ang1);
+ cadena.concat(",");
+ cadena.concat(ang2);
+ cadena.concat(",");
 
   // Envio de paquetes
   LoRa.beginPacket();
-  LoRa.print(angulo1);
-  LoRa.print(angulo2);
-  LoRa.print(counter);
+  LoRa.print(cadena);
   LoRa.endPacket();
 
   display.clearDisplay();
@@ -107,11 +116,11 @@ void loop()
   display.setTextSize(1);
   display.print("Angulo1: ");
   display.setCursor(60,20);
-  display.print(angulo1);
+  display.print(ang1);
   display.setCursor(0,30);
   display.print("Angulo2: ");
   display.setCursor(60,30);
-  display.print(angulo2);
+  display.print(ang2);
   display.setCursor(0,50);
   display.print("Enviando: ");
   display.setCursor(60,50);
@@ -119,7 +128,7 @@ void loop()
   display.display();
 
   counter += 1;
-  delay(3000);
+  delay(1000);
   
 }
 void iniciar_Lora() {
