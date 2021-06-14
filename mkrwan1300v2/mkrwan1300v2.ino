@@ -65,11 +65,12 @@ void loop() {
     cadena_envio = "";
     for (int h=0;h<31;h++){
       cadena_envio.concat(cadena[h]);
-      }
+    }
 
     Wire.beginTransmission(4);
     Wire.write(cadena_envio.c_str());
     Wire.endTransmission();
+    Wire.flush();
     Serial.println("Enviado por wire");
   }
 }
