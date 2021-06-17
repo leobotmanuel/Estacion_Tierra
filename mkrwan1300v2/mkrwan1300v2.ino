@@ -109,7 +109,7 @@ void loop() {
       }
     }
 
-    if (datos[0] == "ArgonSat") {
+    if (datos[0] == "1639") {
 
       Fichero = SD.open("cansat.csv", FILE_WRITE);
       Fichero.println(cadena);
@@ -148,7 +148,6 @@ void calcularDistancia(float suLatitud, float suLongitud) {
 
     float distancia = sqrt(pow(distlat, 2) + pow(distlon, 2));
     distancia *= 1000;
-    distancia -= 12;
     Serial.print(distancia);
 
     display.setTextSize(1);
@@ -157,7 +156,6 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     display.print("Distancia:");
     display.println(distancia);
     display.display();
-    delay(100);
     display.clearDisplay();
   
     Serial.println("m");
