@@ -5,7 +5,6 @@
 #include <Adafruit_SSD1306.h>
 
 // Definimos los pines del modulo LoRa
-
 #define SCK 5
 #define MISO 19
 #define MOSI 27
@@ -20,12 +19,10 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
-
 // Declaramos el ancho de banda del LoRa
 #define BANDA 868E6
 
 // Declaramos las variables
-
 int angulo1 = 0;  
 int angulo2 = 0;
 
@@ -47,9 +44,10 @@ void setup()
 
   // Iniciamos la OLED
   Wire.begin(OLED_SDA, OLED_SCL);
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3c, false, false)) { // Address 0x3C for 128x32
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3c, false, false)) 
+  { 
     Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
+    for(;;);
   }
 
   display.clearDisplay();
@@ -66,25 +64,15 @@ void loop()
 
   if (joy <= 2770)
   {
-    
     angulo1 = map(joy, 0, 2749, 45, 0);
-    
   } else {
-    
     angulo1 = 0;
-    
   }
-
   if (joy >= 2770)
   {
-  
     angulo2 = map(joy, 2749, 4095, 0, 45);
-  
-     
   }else{
-    
     angulo2 = 0;
-   
   }
   
   String ang1 = String(angulo1);
@@ -96,13 +84,14 @@ void loop()
 
   Serial.print("Mandando paquete: ");
   Serial.println(counter);
+  
   String cadena;
- cadena.concat("puto el que lo lea");
- cadena.concat(","); 
- cadena.concat(ang1);
- cadena.concat(",");
- cadena.concat(ang2);
- cadena.concat(",");
+  cadena.concat("Servo");
+  cadena.concat(","); 
+  cadena.concat(ang1);
+  cadena.concat(",");
+  cadena.concat(ang2);
+  cadena.concat(",");
 
   // Envio de paquetes
   LoRa.beginPacket();
@@ -131,15 +120,15 @@ void loop()
   delay(1000);
   
 }
-void iniciar_Lora() {
-
-//Pines SPI de LoRa
+void iniciar_Lora() 
+{
+  //Pines SPI de LoRa
   SPI.begin(SCK, MISO, MOSI, SS);
   
-//Pines LoRa
+  //Pines LoRa
   LoRa.setPins(SS, RST, DIO0);
-
-//Iniciamos LoRa
+  
+  //Iniciamos LoRa
   if (!LoRa.begin(BANDA)) 
   {
     Serial.println("Error al inicial LoRa!");
