@@ -5,6 +5,9 @@
 #include <AES.h>
 #include <Adafruit_GPS.h>
 #include <math.h>
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 File Fichero;
 AES aes;
@@ -24,11 +27,19 @@ String cadena_envio;
 String prov;
 int contador;
 
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+
 void setup() {
   Serial.begin(115200);
 
   Wire.setClock(100000);
   Wire.begin();
+  
+  display.begin (SSD1306_SWITCHCAPVCC, 0x3C);
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+  display.display();
 
   if (!SD.begin(2))
   {
@@ -104,8 +115,6 @@ void loop() {
       Fichero.println(cadena);
       Fichero.close();
 
-
-
       calcularDistancia(datos[6].toFloat(), datos[7].toFloat());
 
       cadena_envio = "";
@@ -113,10 +122,10 @@ void loop() {
         cadena_envio.concat(cadena[h]);
       }
 
-      Wire.beginTransmission(4);
-      Wire.write(cadena_envio.c_str());
-      Wire.endTransmission();
-      Wire.flush();
+      //Wire.beginTransmission(4);
+      //Wire.write(cadena_envio.c_str());
+      //Wire.endTransmission();
+      //Wire.flush();
       Serial.println("Enviado por wire");
     }
   }
@@ -134,26 +143,25 @@ void calcularDistancia(float suLatitud, float suLongitud) {
       distlon *= -1;
     }
 
-    Serial.print(distlat);
-    Serial.println("º");
-    Serial.print(distlon);
-    Serial.println("º");
-
     distlat *= 96.225;
     distlon *= 111.3194;
 
     float distancia = sqrt(pow(distlat, 2) + pow(distlon, 2));
     distancia *= 1000;
     distancia -= 12;
-    Serial.print(distancia);1
-    
+    Serial.print(distancia);
+
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.print("Distancia:");
+    display.println(distancia);
+    display.display();
+    delay(100);
+    display.clearDisplay();
+  
     Serial.println("m");
     distancia /= 1000;
-
-    Serial.print(distlat);
-    Serial.println("km");
-    Serial.print(distlon);
-    Serial.println("km");
 
     float dif = distlat / distancia;
 
