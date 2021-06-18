@@ -156,7 +156,6 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     display.print("Distancia:");
     display.println(distancia);
     display.display();
-    display.clearDisplay();
   
     Serial.println("m");
     distancia /= 1000;
@@ -167,6 +166,12 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     float angulo = (alpha * 180) / PI;
     Serial.print(angulo);
     Serial.println("º con respecto al norte");
+    
+    display.print("Ángulo:");
+    display.print(angulo);
+    display.println(" º");
+    display.display();
+    display.clearDisplay();
 
     Serial.print("\n");
   }
