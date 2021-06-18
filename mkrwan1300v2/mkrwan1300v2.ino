@@ -167,6 +167,7 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     Serial.print(angulo);
     Serial.println("º con respecto al norte");
     
+    display.setCursor(15,0);
     display.print("Ángulo:");
     display.print(angulo);
     display.println(" º");
