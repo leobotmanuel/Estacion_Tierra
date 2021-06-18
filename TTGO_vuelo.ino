@@ -117,7 +117,7 @@ void loop()
   display.display();
 
   counter += 1;
-  delay(1000);
+  delay(500);
   
 }
 void iniciar_Lora() 
