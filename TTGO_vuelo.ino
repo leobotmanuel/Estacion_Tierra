@@ -86,7 +86,7 @@ void loop()
   Serial.println(counter);
   
   String cadena;
-  cadena.concat("Servo");
+  cadena.concat("puto el que lo lea");
   cadena.concat(","); 
   cadena.concat(ang1);
   cadena.concat(",");
