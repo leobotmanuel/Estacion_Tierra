@@ -1,6 +1,6 @@
+// Incluimos las librerías
 #include <LoRa.h>
 #include <SPI.h>
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -29,11 +29,13 @@ int angulo2 = 0;
 // Contador de paquetes LoRa
 int counter = 0;
 
+// Creamos un objeto de pantalla para la OLED
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 
 void setup() 
 {
-  Serial.begin(9600);
+  // Iniciamos el Serial a 115200 baudios y el LoRa
+  Serial.begin(115200);
   iniciar_Lora();
   
   // Reseteamos la OLED
@@ -49,7 +51,6 @@ void setup()
     Serial.println(F("SSD1306 allocation failed"));
     for(;;);
   }
-
   display.clearDisplay();
   display.setTextColor(WHITE);
   display.setTextSize(1);
@@ -60,6 +61,7 @@ void setup()
    
 void loop() 
 {
+   // Leemos el Joystick
   int joy = analogRead(A1);
 
   if (joy <= 2770)
@@ -82,22 +84,23 @@ void loop()
   Serial.println(ang1);
   Serial.println(ang2);
 
-  Serial.print("Mandando paquete: ");
-  Serial.println(counter);
   
   String cadena;
-  cadena.concat("puto el que lo lea");
+  cadena.concat("cva");
   cadena.concat(","); 
   cadena.concat(ang1);
   cadena.concat(",");
   cadena.concat(ang2);
   cadena.concat(",");
-
+ 
   // Envio de paquetes
+  Serial.print("Mandando paquete: ");
+  Serial.println(counter);
   LoRa.beginPacket();
   LoRa.print(cadena);
   LoRa.endPacket();
 
+  // Imprimimos los datos del control de vuelo en la OLED
   display.clearDisplay();
   display.setCursor(0,0);
   display.println("CONTROL DE VUELO");
@@ -116,10 +119,11 @@ void loop()
   display.print(counter);      
   display.display();
 
+  // Esperamos 5 segundos
   counter += 1;
-  delay(500);
-  
+  delay(5000);
 }
+
 void iniciar_Lora() 
 {
   //Pines SPI de LoRa
