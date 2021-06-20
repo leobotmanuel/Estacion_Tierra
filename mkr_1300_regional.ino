@@ -68,7 +68,7 @@ void setup() {
   // Abrimos el documento .csv y escribimos la cabecera
   Fichero = SD.open("cansat.csv", FILE_WRITE);
   if (Fichero) {
-    Fichero.println("clave,temperaturaBME,presionBME,humedadBME,altitudBME,DUV,CO2,GasesVolatiles,AcelerometroX,AcelerometroY,AcelerometroZ,GiroscopioX,GiroscopioY,GiroscopioZ,MagnetometroX,MagnetometroY,MagnetometroZ,bateria,LatitudGPS,LongitudGPS,velocidadGPS,altitudGPS");
+    Fichero.println("clave,temperaturaBME,presionBME,humedadBME,altitudBME,DUV,CO2,GasesVolatiles,AcelerometroX,AcelerometroY,AcelerometroZ,GiroscopioX,GiroscopioY,GiroscopioZ,MagnetometroX,MagnetometroY,MagnetometroZ,presAlt, tempAlt, altAlt,bateria,IR,LatitudGPS,LongitudGPS,velocidadGPS,altitudGPS");
     Fichero.close();
   }
 }
