@@ -24,7 +24,7 @@ Adafruit_GPS GPS(&GPSSerial);
 
 // Creamos la clave para el cifrado
 byte *key = (unsigned char*)"0123456789010123";
-unsigned long long int my_iv = 36753562;
+  unsigned long long int my_iv = 36753562;
 
 // Variables para separar latitud y longitud de los otros valores del paquete recibido
 String datos[22];
@@ -36,7 +36,7 @@ int contador;
 String cadena;
 
 // Creamos un objeto de pantalla para la OLED
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
 
 void setup() {
   // Iniciamos el puerto Serial a 115200 baudios
