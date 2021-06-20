@@ -23,8 +23,8 @@
 #define BANDA 868E6
 
 // Declaramos las variables
-int angulo1 = 0;
-int angulo2 = 0;
+int angulo1 = 90;
+int angulo2 = 90;
 
 // Contador de paquetes LoRa
 int counter = 0;
@@ -66,15 +66,15 @@ void loop()
 
   if (joy <= 2770)
   {
-    angulo1 = map(joy, 0, 2749, 45, 0);
+    angulo1 = map(joy, 0, 2749, 45, 90);
   } else {
-    angulo1 = 0;
+    angulo1 = 90;
   }
   if (joy >= 2770)
   {
-    angulo2 = map(joy, 2749, 4095, 0, 45);
+    angulo2 = map(joy, 2749, 4095, 90, 45);
   } else {
-    angulo2 = 0;
+    angulo2 = 90;
   }
 
   String ang1 = String(angulo1);
