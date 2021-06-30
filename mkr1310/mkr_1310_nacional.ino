@@ -119,7 +119,7 @@ void loop() {
       Fichero.close();
 
       // Calculamos la distancia entre el CanSat y la estación
-      calcularDistancia(datos[23].toFloat(), datos[24].toFloat());
+      calcularDistancia(datos[22].toFloat(), datos[23].toFloat());
     }
   }
 }
@@ -146,9 +146,9 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
-    display.print("Distancia:");
-    display.println(distancia);
-    display.display();
+    display.print("Distancia: ");
+    display.print(distancia);
+    display.println(" m");
 
     Serial.println("m");
     distancia /= 1000;
@@ -160,9 +160,12 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     Serial.print(angulo);
     Serial.println("º con respecto al norte");
 
-    display.setCursor(0, 15);
-    display.print("Angulo:");
+    display.print("Angulo: ");
     display.print(angulo);
+    display.println(" º");
+    display.print("Batería: ");
+    display.print(datos[20]);
+    display.println(" %");
     display.display();
     display.clearDisplay();
 
