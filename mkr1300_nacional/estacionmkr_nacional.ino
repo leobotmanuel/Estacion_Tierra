@@ -9,7 +9,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-// Creamos el fichero para la SD y un objeto AES para usar las librerís respectivas
+// Creamos el fichero para la SD
 File Fichero;
 
 // Difinimos el puerto Serial del GPS
