@@ -13,7 +13,7 @@
 File Fichero;
 
 // Difinimos el puerto Serial del GPS
-#define GPSSerial Serial1
+#define GPSSerial Serial1 
 
 // Creamos un objeto GPS usando el Serial al que está conectado
 Adafruit_GPS GPS(&GPSSerial);
@@ -162,8 +162,8 @@ void calcularDistancia(float suLatitud, float suLongitud) {
 
     display.print("Angulo: ");
     display.print(angulo);
-    display.println(" º");
-    display.print("Batería: ");
+    display.println(" deg");
+    display.print("Bateria: ");
     display.print(datos[20]);
     display.println(" %");
     display.display();
