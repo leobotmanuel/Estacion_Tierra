@@ -1,3 +1,4 @@
+// Para miniestación, comentar esta línea de código:
 #define MKR
 
 // Incluimos las librerías
