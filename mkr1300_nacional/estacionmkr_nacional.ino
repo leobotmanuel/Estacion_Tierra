@@ -1,4 +1,5 @@
 // Incluimos las librerías
+#include <xxtea-lib.h>
 #include <SPI.h>
 #include <LoRa.h>
 #include <SD.h>
@@ -9,11 +10,11 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-// Creamos el fichero para la SD
+// Creamos el fichero para la SD y un objeto AES para usar las librerís respectivas
 File Fichero;
 
 // Difinimos el puerto Serial del GPS
-#define GPSSerial Serial1 
+#define GPSSerial Serial1
 
 // Creamos un objeto GPS usando el Serial al que está conectado
 Adafruit_GPS GPS(&GPSSerial);
@@ -42,6 +43,7 @@ void setup() {
   delay(2000);
   display.clearDisplay();
   display.display();
+  xxtea.setKey("argonautex");
 
   // Iniciamos la SD
   if (!SD.begin(2))
@@ -84,7 +86,7 @@ void loop() {
   if (GPSECHO)
     if (c) Serial.print(c);
   if (GPS.newNMEAreceived()) {
-    Serial.print(GPS.lastNMEA());
+    //Serial.print(GPS.lastNMEA());
     if (!GPS.parse(GPS.lastNMEA()))
       return;
   }
@@ -96,26 +98,28 @@ void loop() {
     while (LoRa.available()) {
       cadena = cadena + (char)LoRa.read();
     }
-
+    String descifrado = xxtea.decrypt(cadena);
     delay(1000);
-    Serial.println(cadena);
-
+    
     // Separamos la cadena y la guardamos como lista de valores
-    for (int h = 0; h < cadena.length(); h++) { 
-      if (cadena[h] != ',') {
-        prov = prov + cadena[h];
-      } else if (cadena[h] == ',') {
-        datos[contador] = prov;
-        prov = "";
-        contador ++;
+      for (int h = 0; h < descifrado.length(); h++) {
+        if (descifrado[h] != ',') {
+          prov = prov + descifrado[h];
+        } else if (descifrado[h] == ',') {
+          datos[contador] = prov;
+          prov = "";
+          contador ++;
+        }
       }
-    }
 
     // Si el primer datos es la clave
     if (datos[0] == "1639") {
-      // Guardamos en la SD
+
+      Serial.println(descifrado);
+
+      
       Fichero = SD.open("cansat.csv", FILE_WRITE);
-      Fichero.println(cadena);
+      Fichero.println(descifrado);
       Fichero.close();
 
       // Calculamos la distancia entre el CanSat y la estación
@@ -141,7 +145,7 @@ void calcularDistancia(float suLatitud, float suLongitud) {
 
     float distancia = sqrt(pow(distlat, 2) + pow(distlon, 2));
     distancia *= 1000;
-    Serial.print(distancia);
+    //Serial.print(distancia);
 
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
@@ -150,15 +154,15 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     display.print(distancia);
     display.println(" m");
 
-    Serial.println("m");
+    //Serial.println("m");
     distancia /= 1000;
 
     float dif = distlat / distancia;
 
     float alpha = acos(dif);
     float angulo = (alpha * 180) / PI;
-    Serial.print(angulo);
-    Serial.println("º con respecto al norte");
+    //Serial.print(angulo);
+    //Serial.println("º con respecto al norte");
 
     display.print("Angulo: ");
     display.print(angulo);
@@ -169,6 +173,6 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     display.display();
     display.clearDisplay();
 
-    Serial.print("\n");
+    //Serial.print("\n");
   }
 }
