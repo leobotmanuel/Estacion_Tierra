@@ -1,4 +1,4 @@
-// Para miniestación, comentar esta línea de código:
+// Comentar esta línea de código para las miniestaciones
 #define MKR
 
 // Incluimos las librerías
@@ -154,11 +154,16 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     if (distlat < 0) {
       distlat *= -1;
     }
+      // si la longitud es mayor
     if (distlon < 0) {
       distlon *= -1;
+      char dir = 'O';
+    }
+    else {
+      char dir = 'W';
     }
 
-    distlat *= 96.225;
+    distlat *= 88.6831;
     distlon *= 111.3194;
 
     float distancia = sqrt(pow(distlat, 2) + pow(distlon, 2));
@@ -184,7 +189,9 @@ void calcularDistancia(float suLatitud, float suLongitud) {
 
     display.print("Angulo: ");
     display.print(angulo);
-    display.println(" deg");
+    display.print(" deg");
+    display.println(dir);
+    
     display.print("Bateria: ");
     display.print(datos[20]);
     display.println(" %");
