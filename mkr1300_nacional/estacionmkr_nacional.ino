@@ -1,57 +1,61 @@
+#define MKR
+
 // Incluimos las librerías
-#include <xxtea-lib.h>
 #include <SPI.h>
 #include <LoRa.h>
 #include <SD.h>
 #include <Wire.h>
+
+#ifdef MKR
 #include <Adafruit_GPS.h>
 #include <math.h>
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#endif
 
-// Creamos el fichero para la SD y un objeto AES para usar las librerís respectivas
+
+// Clave para el cifrado propio
+static const int clave = 43;
+
+// Creamos el fichero para la SD y un objeto AES para usar las librerías respectivas
 File Fichero;
 
+#ifdef MKR
 // Difinimos el puerto Serial del GPS
 #define GPSSerial Serial1
 
 // Creamos un objeto GPS usando el Serial al que está conectado
 Adafruit_GPS GPS(&GPSSerial);
 
+// Creamos un objeto de pantalla para la OLED
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
+
 #define GPSECHO false
 
 // Variables para separar latitud y longitud de los otros valores del paquete recibido
-String datos[26];
 String datosGPS[2];
 String distancia;
+#endif
+
+String datos[26];
 String cadena_envio;
 String prov;
 int contador;
 String cadena;
 
-// Creamos un objeto de pantalla para la OLED
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
 
 void setup() {
   // Iniciamos el puerto Serial a 115200 baudios
   Serial.begin(115200);
 
   // Iniciamos la OLED
+#ifdef MKR
   display.begin (SSD1306_SWITCHCAPVCC, 0x3C);
   display.display();
   delay(2000);
   display.clearDisplay();
   display.display();
-  xxtea.setKey("argonautex");
-
-  // Iniciamos la SD
-  if (!SD.begin(2))
-  {
-    Serial.println("Error al iniciar lector SD");
-    return;
-  }
-  while (!Serial);
 
   // Iniciamos el GPS
   GPS.begin(9600);
@@ -60,6 +64,15 @@ void setup() {
   GPS.sendCommand(PGCMD_ANTENNA);
   delay(1000);
   GPSSerial.println(PMTK_Q_RELEASE);
+#endif
+
+  // Iniciamos la SD
+  if (!SD.begin(2))
+  {
+    Serial.println("Error al iniciar lector SD");
+    return;
+  }
+  while (!Serial);
 
   // Iniciamos LoRa
   if (!LoRa.begin(868E6)) {
@@ -82,6 +95,7 @@ void loop() {
   cadena = "";
 
   // Comprobar si el GPS lee nuevos datos
+#ifdef MKR
   char c = GPS.read();
   if (GPSECHO)
     if (c) Serial.print(c);
@@ -90,6 +104,7 @@ void loop() {
     if (!GPS.parse(GPS.lastNMEA()))
       return;
   }
+#endif
 
   // Comprobar si LoRa recibe datos
   int packetSize = LoRa.parsePacket();
@@ -98,32 +113,34 @@ void loop() {
     while (LoRa.available()) {
       cadena = cadena + (char)LoRa.read();
     }
-    String descifrado = xxtea.decrypt(cadena);
+    String descifrado = descifrar(cadena);
     delay(1000);
-    
+
     // Separamos la cadena y la guardamos como lista de valores
-      for (int h = 0; h < descifrado.length(); h++) {
-        if (descifrado[h] != ',') {
-          prov = prov + descifrado[h];
-        } else if (descifrado[h] == ',') {
-          datos[contador] = prov;
-          prov = "";
-          contador ++;
-        }
+    for (int h = 0; h < descifrado.length(); h++) {
+      if (descifrado[h] != ',') {
+        prov = prov + descifrado[h];
+      } else if (descifrado[h] == ',') {
+        datos[contador] = prov;
+        prov = "";
+        contador ++;
       }
+    }
 
     // Si el primer datos es la clave
     if (datos[0] == "1639") {
 
       Serial.println(descifrado);
 
-      
+
       Fichero = SD.open("cansat.csv", FILE_WRITE);
       Fichero.println(descifrado);
       Fichero.close();
 
       // Calculamos la distancia entre el CanSat y la estación
+#ifdef MKR
       calcularDistancia(datos[22].toFloat(), datos[23].toFloat());
+#endif
     }
   }
 }
@@ -175,4 +192,13 @@ void calcularDistancia(float suLatitud, float suLongitud) {
 
     //Serial.print("\n");
   }
+}
+
+String descifrar(String entrada) {
+  String salida;
+  for (int i = 0; i < entrada.length(); i++) {
+    byte entrada_cifrada = (byte)entrada[i] - clave;
+    salida += (char)entrada_cifrada;
+  }
+  return salida;
 }
