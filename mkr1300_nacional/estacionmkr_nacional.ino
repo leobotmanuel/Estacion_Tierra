@@ -190,7 +190,7 @@ void calcularDistancia(float suLatitud, float suLongitud) {
     display.print("Angulo: ");
     display.print(angulo);
     display.print(" deg");
-    display.println(dir);
+    display.println(dif);
     
     display.print("Bateria: ");
     display.print(datos[20]);
