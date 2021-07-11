@@ -29,7 +29,7 @@ client.loop_start()
 while True:
     linea = ""
     prov = ""
-    datosthingsboard = [None] * 5
+    datosthingsboard = [None] * 26
     contador = 0
 
     linea = str(arduino.readline())
