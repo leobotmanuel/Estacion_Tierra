@@ -121,7 +121,7 @@ void loop()
 
   // Esperamos 5 segundos
   counter += 1;
-  delay(1000);
+  delay(5000);
 }
 
 void iniciar_Lora()
