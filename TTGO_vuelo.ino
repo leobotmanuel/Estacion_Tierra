@@ -23,7 +23,7 @@
 #define BANDA 868E6
 
 // Declaramos las variables
-int angulo1 = 180;
+int angulo1 = 170;
 int angulo2 = 180;
 
 // Contador de paquetes LoRa
@@ -66,9 +66,9 @@ void loop()
 
   if (joy <= 2770)
   {
-    angulo1 = map(joy, 0, 2749, 90, 180);
+    angulo1 = map(joy, 0, 2749, 80, 170);
   } else {
-    angulo1 = 180;
+    angulo1 = 170;
   }
   if (joy >= 2770)
   {
@@ -121,7 +121,7 @@ void loop()
 
   // Esperamos 5 segundos
   counter += 1;
-  delay(5000);
+  delay(1000);
 }
 
 void iniciar_Lora()
