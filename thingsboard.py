@@ -46,9 +46,27 @@ while True:
                 contador += 1
             temp = datosthingsboard[1]
             pres = datosthingsboard[2]
+            hum = datosthingsboard[3]
+            duv = datosthingsboard[5]
+            co2 = datosthingsboard[6]
+            gas = datosthingsboard[7]
+            velo = datosthingsboard[24]
+            alt = datosthingsboard[25]
+            lat = datosthingsboard[22]
+            lon = datosthingsboard[23]
+
+
 
             sensor_data['temperaturaBME'] = temp
             sensor_data['presionBME'] = pres
+            sensor_data['humedadBME'] = hum
+            sensor_data['DUV'] = duv
+            sensor_data['CO2'] = co2
+            sensor_data['GasesVolatiles'] = gas
+            sensor_data['velocidadGPS'] = velo
+            sensor_data['altitudGPS'] = alt
+            sensor_data['LatitudGPS'] = lat
+            sensor_data['LongitudGPS'] = lon
 
             # Mandamos los datos a Thingsboard
             client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
