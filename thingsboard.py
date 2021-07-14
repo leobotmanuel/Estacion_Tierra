@@ -13,6 +13,9 @@ ACCESS_TOKEN = 'ASD'
 
 INTERVAL = 1
 
+lat =0
+lon =0
+
 sensor_data = {}
 
 next_reading = time.time()
@@ -52,10 +55,18 @@ while True:
             gas = datosthingsboard[7]
             velo = datosthingsboard[24]
             alt = datosthingsboard[25]
-            lat = datosthingsboard[22]
-            lon = datosthingsboard[23]
+            if (datosthingsboard[22] is not None):
+                latgrad = float(datosthingsboard[22]) // 100
+                latmin = float(datosthingsboard[22]) % 100
+                lat = latgrad + (latmin/60)
 
 
+
+
+            if (datosthingsboard[23] is not None):
+                longrad = float(datosthingsboard[23]) // 100
+                lonmin = float(datosthingsboard[23]) % 100
+                lon = -(longrad + (lonmin/60))
 
             sensor_data['temperaturaBME'] = temp
             sensor_data['presionBME'] = pres
@@ -65,8 +76,8 @@ while True:
             sensor_data['GasesVolatiles'] = gas
             sensor_data['velocidadGPS'] = velo
             sensor_data['altitudGPS'] = alt
-            sensor_data['LatitudGPS'] = lat
-            sensor_data['LongitudGPS'] = lon
+            sensor_data['LatitudGPS'] = str(lat)
+            sensor_data['LongitudGPS'] = str(lon)
 
             # Mandamos los datos a Thingsboard
             client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
